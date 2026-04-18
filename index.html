@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuestos - Modelo Equipamientos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            background: white;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .login-panel {
+            grid-column: 1 / -1;
+            max-width: 400px;
+            margin: 50px auto;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .productos-section {
+            margin-top: 30px;
+        }
+
+        .producto-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .producto-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .producto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .producto-number {
+            background: #3b82f6;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        .image-upload {
+            margin-bottom: 15px;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            padding: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            margin-top: 0;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            margin-top: 20px;
+        }
+
+        .preview-container {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 400px;
+        }
+
+        .preview-text {
+            color: #64748b;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .historial-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .historial-item:hover {
+            border-color: #3b82f6;
+            transform: translateX(4px);
+        }
+
+        .historial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .historial-cliente {
+            font-weight: 700;
+            color: #1e3a8a;
+            font-size: 16px;
+        }
+
+        .historial-fecha {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .historial-total {
+            font-size: 20px;
+            font-weight: 800;
+            color: #10b981;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #1e3a8a;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab:hover {
+            color: #1e3a8a;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="container">
+            <div class="panel header">
+                <h1>🏢 Modelo Equipamientos</h1>
+                <p>Sistema de Generación de Presupuestos</p>
+            </div>
+            
+            <div class="panel login-panel">
+                <h2 class="section-title">Iniciar Sesión</h2>
+                <div id="loginError" class="alert alert-error hidden"></div>
+                
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="loginUser" placeholder="modelo">
+                </div>
+                
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPass" placeholder="••••••••">
+                </div>
+                
+                <button class="btn" onclick="login()">Ingresar</button>
+                
+                <p style="margin-top: 20px; text-align: center; color: #64748b; font-size: 13px;">
+                    <strong>Demo:</strong> usuario: <code>modelo</code> / contraseña: <code>modelo2025</code>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp" class="hidden">
+        <div class="container">
+            <div class="panel header">
+                <h1>📋 Generador de Presupuestos</h1>
+                <p>Modelo Equipamientos</p>
+            </div>
+
+            <!-- TABS -->
+            <div class="panel" style="grid-column: 1 / -1;">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('nuevo')">Nuevo Presupuesto</button>
+                    <button class="tab" onclick="switchTab('historial')">Historial</button>
+                </div>
+            </div>
+
+            <!-- TAB: NUEVO PRESUPUESTO -->
+            <div id="tabNuevo">
+                <!-- FORMULARIO -->
+                <div class="panel">
+                    <h2 class="section-title">Datos del Presupuesto</h2>
+                    
+                    <div id="successAlert" class="alert alert-success hidden"></div>
+                    
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <input type="text" id="cliente" placeholder="Ej: Gabriel De Leon">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Referencia</label>
+                        <input type="text" id="referencia" value="MOBILIARIO de OFICINA">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="fecha">
+                        </div>
+                        <div class="form-group">
+                            <label>Tiempo de Entrega</label>
+                            <input type="text" id="tiempoEntrega" value="8 días hábiles">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lugar de Entrega</label>
+                        <input type="text" id="lugarEntrega" value="Montevideo">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Material</label>
+                            <input type="text" id="material" value="Material melamínico 18 y 38 mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Forma de Pago</label>
+                            <input type="text" id="formaPago" value="Seña 50% y saldo contra entrega">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>IVA (%)</label>
+                        <input type="number" id="iva" value="22" min="0" max="100">
+                    </div>
+
+                    <h2 class="section-title" style="margin-top: 40px;">Productos</h2>
+                    
+                    <div id="productosContainer"></div>
+
+                    <button class="btn btn-add" onclick="agregarProducto()">+ Agregar Producto</button>
+
+                    <button class="btn btn-secondary" onclick="generarYDescargarPDF()">📄 Generar PDF</button>
+                    <button class="btn" onclick="guardarPresupuesto()">💾 Guardar Presupuesto</button>
+                    <button class="btn btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
+                </div>
+
+                <!-- PREVIEW -->
+                <div class="panel">
+                    <h2 class="section-title">Vista Previa</h2>
+                    <div class="preview-container" id="previewContainer">
+                        <div class="preview-text">
+                            <h3>📄 Vista Previa del PDF</h3>
+                            <p>Completá los datos y agregá productos.<br>El PDF se generará cuando presiones "Generar PDF".</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: HISTORIAL -->
+            <div id="tabHistorial" class="hidden">
+                <div class="panel" style="grid-column: 1 / -1;">
+                    <h2 class="section-title">Presupuestos Guardados</h2>
+                    <div id="historialContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== STORAGE ====================
+        const STORAGE_KEY = 'modelo_presupuestos';
+        const USER_KEY = 'modelo_user';
+
+        function saveToStorage(presupuesto) {
+            const presupuestos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            presupuesto.id = Date.now();
+            presupuesto.fechaCreacion = new Date().toISOString();
+            presupuestos.push(presupuesto);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(presupuestos));
+            return presupuesto.id;
+        }
+
+        function loadFromStorage() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        }
+
+        function deleteFromStorage(id) {
+            let presupuestos = loadFromStorage();
+            presupuestos = presupuestos.filter(p => p.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(presupuestos));
+        }
+
+        // ==================== LOGIN ====================
+        function login() {
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            
+            // Demo credentials
+            if (user === 'modelo' && pass === 'modelo2025') {
+                localStorage.setItem(USER_KEY, user);
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                inicializarApp();
+            } else {
+                const errorDiv = document.getElementById('loginError');
+                errorDiv.textContent = 'Usuario o contraseña incorrectos';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(USER_KEY);
+            location.reload();
+        }
+
+        function checkAuth() {
+            const user = localStorage.getItem(USER_KEY);
+            if (user) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                inicializarApp();
+            }
+        }
+
+        // ==================== PRODUCTOS ====================
+        let productos = [];
+        let productoCounter = 0;
+
+        function agregarProducto() {
+            productoCounter++;
+            const id = productoCounter;
+            
+            productos.push({
+                id: id,
+                cantidad: 1,
+                descripcion: '',
+                detalles: '',
+                precioUnitario: 0,
+                imagen: null
+            });
+
+            renderProductos();
+        }
+
+        function eliminarProducto(id) {
+            productos = productos.filter(p => p.id !== id);
+            renderProductos();
+        }
+
+        function renderProductos() {
+            const container = document.getElementById('productosContainer');
+            
+            if (productos.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">No hay productos agregados</p>';
+                return;
+            }
+
+            container.innerHTML = productos.map((p, index) => `
+                <div class="producto-item">
+                    <div class="producto-header">
+                        <div class="producto-number">${index + 1}</div>
+                        <button class="btn-remove" onclick="eliminarProducto(${p.id})">✕ Eliminar</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" min="1" value="${p.cantidad}" 
+                            onchange="actualizarProducto(${p.id}, 'cantidad', parseFloat(this.value))">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción Principal</label>
+                        <input type="text" placeholder="Ej: Mesadas de 240x60x76 alto Tapa Roble Tropical de 38mm"
+                            value="${p.descripcion}"
+                            onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Detalles (opcional)</label>
+                        <textarea placeholder="Ej: con base de 4 patas en aluminio cuadradas de 6cm&#10;con 1 cajonera de 2 cajones con cerradura..."
+                            onchange="actualizarProducto(${p.id}, 'detalles', this.value)">${p.detalles}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Precio Unitario (U$S)</label>
+                        <input type="number" min="0" step="0.01" value="${p.precioUnitario}"
+                            onchange="actualizarProducto(${p.id}, 'precioUnitario', parseFloat(this.value))">
+                    </div>
+
+                    <div class="form-group image-upload">
+                        <label>Imagen del Producto</label>
+                        <input type="file" accept="image/*" onchange="cargarImagen(${p.id}, this)">
+                        ${p.imagen ? `<img src="${p.imagen}" class="image-preview">` : ''}
+                    </div>
+
+                    <div style="background: #e0f2fe; padding: 12px; border-radius: 6px; text-align: center; font-weight: 700; color: #0c4a6e;">
+                        Total: U$S ${(p.cantidad * p.precioUnitario).toFixed(2)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarProducto(id, campo, valor) {
+            const producto = productos.find(p => p.id === id);
+            if (producto) {
+                producto[campo] = valor;
+                renderProductos();
+            }
+        }
+
+        function cargarImagen(id, input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    actualizarProducto(id, 'imagen', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ==================== PDF GENERATION ====================
+        function generarYDescargarPDF() {
+            const cliente = document.getElementById('cliente').value;
+            
+            if (!cliente) {
+                alert('Por favor, ingresá el nombre del cliente');
+                return;
+            }
+
+            if (productos.length === 0) {
+                alert('Agregá al menos un producto');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Datos del presupuesto
+            const referencia = document.getElementById('referencia').value;
+            const fecha = new Date(document.getElementById('fecha').value);
+            const tiempoEntrega = document.getElementById('tiempoEntrega').value;
+            const lugarEntrega = document.getElementById('lugarEntrega').value;
+            const material = document.getElementById('material').value;
+            const formaPago = document.getElementById('formaPago').value;
+            const iva = parseFloat(document.getElementById('iva').value) || 0;
+
+            const fechaFormateada = fecha.toLocaleDateString('es-UY', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            // Cálculos
+            const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
+            const ivaAmount = subtotal * (iva / 100);
+            const total = subtotal + ivaAmount;
+
+            let yPos = 20;
+
+            // HEADER
+            doc.setFontSize(24);
+            doc.setFont('helvetica', 'bold');
+            doc.text('modelo', 20, yPos);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text('equipamiento de oficinas', 20, yPos + 5);
+
+            doc.setFontSize(11);
+            doc.text(`Montevideo, ${fechaFormateada}`, 140, yPos, { align: 'right' });
+
+            yPos += 15;
+            doc.line(20, yPos, 190, yPos);
+            yPos += 10;
+
+            // CLIENTE
+            doc.setFontSize(12);
+            doc.setTextColor(239, 68, 68); // Rojo
+            doc.setFont('helvetica', 'bold');
+            doc.text('Sr.', 20, yPos);
+            yPos += 6;
+            doc.text(cliente, 20, yPos);
+            yPos += 8;
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.text(`REF : ${referencia}`, 140, yPos - 8, { align: 'right' });
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('Presente', 20, yPos);
+            yPos += 8;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text('De nuestra consideración:', 20, yPos);
+            yPos += 5;
+            doc.text('        Por intermedio de la presente tenemos el', 20, yPos);
+            yPos += 5;
+            doc.text('agrado de cotizar el siguiente mobiliario de oficinas:', 20, yPos);
+            yPos += 10;
+
+            // TABLA DE PRODUCTOS
+            const tableData = productos.map(p => [
+                `${p.cantidad} - ${p.descripcion}\n${p.detalles}`,
+                p.precioUnitario.toFixed(2),
+                (p.cantidad * p.precioUnitario).toFixed(2)
+            ]);
+
+            tableData.push(
+                ['sub Total U$S', '', subtotal.toFixed(2)],
+                [`IVA ${iva}% U$S`, '', '+ IVA'],
+                ['TOTAL U$S', '', total.toFixed(2)]
+            );
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['D E S C R I P C I O N', 'UNITARIO', 'TOTAL']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0],
+                    fontStyle: 'bold',
+                    lineWidth: 0.5,
+                    lineColor: [0, 0, 0]
+                },
+                bodyStyles: {
+                    lineWidth: 0.5,
+                    lineColor: [0, 0, 0]
+                },
+                columnStyles: {
+                    0: { cellWidth: 110 },
+                    1: { cellWidth: 30, halign: 'right' },
+                    2: { cellWidth: 30, halign: 'right' }
+                },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3
+                }
+            });
+
+            yPos = doc.lastAutoTable.finalY + 10;
+
+            // CONDICIONES
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('- MATERIAL', 20, yPos);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`: ${material}`, 60, yPos);
+            yPos += 6;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('- FORMA DE PAGO', 20, yPos);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`: ${formaPago}`, 60, yPos);
+            yPos += 6;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('- TIEMPO DE ENTREGA :', 20, yPos);
+            doc.setTextColor(239, 68, 68);
+            doc.text(` ${tiempoEntrega}`, 70, yPos);
+            doc.setTextColor(0, 0, 0);
+            yPos += 6;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('- LUGAR DE ENTREGA', 20, yPos);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`: ${lugarEntrega}`, 60, yPos);
+            yPos += 10;
+
+            // FIRMA
+            doc.setFont('helvetica', 'normal');
+            doc.text('Atte. Favio Couñago', 20, yPos);
+
+            // FOOTER
+            yPos = 280;
+            doc.line(20, yPos - 5, 190, yPos - 5);
+            doc.setTextColor(239, 68, 68);
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(9);
+            doc.text('Emilio Frugoni 1250 esq. Constituyente     Tel 24 - 11 - 47 - 47', 105, yPos, { align: 'center' });
+            doc.setTextColor(30, 58, 138);
+            doc.text('www.modeloequipamientos.com', 105, yPos + 5, { align: 'center' });
+
+            // DESCARGAR
+            const filename = `Presupuesto_${cliente.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(filename);
+
+            mostrarAlerta('PDF generado exitosamente', 'success');
+        }
+
+        // ==================== GUARDAR PRESUPUESTO ====================
+        function guardarPresupuesto() {
+            const cliente = document.getElementById('cliente').value;
+            
+            if (!cliente) {
+                alert('Ingresá el nombre del cliente');
+                return;
+            }
+
+            const presupuesto = {
+                cliente: cliente,
+                referencia: document.getElementById('referencia').value,
+                fecha: document.getElementById('fecha').value,
+                tiempoEntrega: document.getElementById('tiempoEntrega').value,
+                lugarEntrega: document.getElementById('lugarEntrega').value,
+                material: document.getElementById('material').value,
+                formaPago: document.getElementById('formaPago').value,
+                iva: document.getElementById('iva').value,
+                productos: productos.map(p => ({...p}))
+            };
+
+            const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
+            const ivaAmount = subtotal * (parseFloat(presupuesto.iva) / 100);
+            presupuesto.total = subtotal + ivaAmount;
+
+            saveToStorage(presupuesto);
+            mostrarAlerta('Presupuesto guardado exitosamente', 'success');
+            cargarHistorial();
+        }
+
+        // ==================== HISTORIAL ====================
+        function cargarHistorial() {
+            const presupuestos = loadFromStorage();
+            const container = document.getElementById('historialContainer');
+
+            if (presupuestos.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">No hay presupuestos guardados</p>';
+                return;
+            }
+
+            container.innerHTML = presupuestos.reverse().map(p => `
+                <div class="historial-item" onclick="cargarPresupuesto(${p.id})">
+                    <div class="historial-header">
+                        <div>
+                            <div class="historial-cliente">${p.cliente}</div>
+                            <div class="historial-fecha">${new Date(p.fechaCreacion).toLocaleDateString('es-UY')}</div>
+                        </div>
+                        <div class="historial-total">U$S ${p.total.toFixed(2)}</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="btn btn-secondary" style="flex: 1; margin: 0; padding: 8px;" onclick="event.stopPropagation(); regenerarPDF(${p.id})">
+                            📄 Generar PDF
+                        </button>
+                        <button class="btn-remove" style="flex: 0;" onclick="event.stopPropagation(); eliminarPresupuesto(${p.id})">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function cargarPresupuesto(id) {
+            const presupuestos = loadFromStorage();
+            const p = presupuestos.find(pr => pr.id === id);
+            
+            if (!p) return;
+
+            document.getElementById('cliente').value = p.cliente;
+            document.getElementById('referencia').value = p.referencia;
+            document.getElementById('fecha').value = p.fecha;
+            document.getElementById('tiempoEntrega').value = p.tiempoEntrega;
+            document.getElementById('lugarEntrega').value = p.lugarEntrega;
+            document.getElementById('material').value = p.material;
+            document.getElementById('formaPago').value = p.formaPago;
+            document.getElementById('iva').value = p.iva;
+            
+            productos = p.productos.map(prod => ({...prod}));
+            productoCounter = Math.max(...productos.map(pr => pr.id));
+
+            renderProductos();
+            switchTab('nuevo');
+            mostrarAlerta('Presupuesto cargado', 'success');
+        }
+
+        function eliminarPresupuesto(id) {
+            if (confirm('¿Eliminar este presupuesto?')) {
+                deleteFromStorage(id);
+                cargarHistorial();
+            }
+        }
+
+        function regenerarPDF(id) {
+            const presupuestos = loadFromStorage();
+            const p = presupuestos.find(pr => pr.id === id);
+            if (!p) return;
+
+            // Cargar temporalmente los datos
+            const originalData = {
+                cliente: document.getElementById('cliente').value,
+                productos: [...productos]
+            };
+
+            cargarPresupuesto(id);
+            
+            setTimeout(() => {
+                generarYDescargarPDF();
+            }, 100);
+        }
+
+        // ==================== TABS ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'nuevo') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('tabNuevo').classList.remove('hidden');
+                document.getElementById('tabHistorial').classList.add('hidden');
+            } else {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('tabNuevo').classList.add('hidden');
+                document.getElementById('tabHistorial').classList.remove('hidden');
+                cargarHistorial();
+            }
+        }
+
+        // ==================== UTILS ====================
+        function mostrarAlerta(mensaje, tipo) {
+            const alert = document.getElementById('successAlert');
+            alert.textContent = mensaje;
+            alert.className = `alert alert-${tipo}`;
+            alert.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 3000);
+        }
+
+        function inicializarApp() {
+            document.getElementById('fecha').valueAsDate = new Date();
+            agregarProducto();
+            cargarHistorial();
+        }
+
+        // CHECK AUTH ON LOAD
+        checkAuth();
+    </script>
+</body>
+</html>
