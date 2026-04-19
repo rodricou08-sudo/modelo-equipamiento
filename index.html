@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presupuestos - Modelo Equipamientos</title>
-    <script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -86,8 +86,7 @@
         }
 
         .form-group input,
-        .form-group textarea,
-        .form-group select {
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e2e8f0;
@@ -98,8 +97,7 @@
         }
 
         .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
+        .form-group textarea:focus {
             outline: none;
             border-color: #3b82f6;
         }
@@ -165,17 +163,6 @@
             background: #dc2626;
         }
 
-        .image-preview {
-            width: 100%;
-            max-height: 200px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-top: 10px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            padding: 10px;
-        }
-
         .btn {
             background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
             color: white;
@@ -193,12 +180,6 @@
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
         }
 
         .btn-secondary {
@@ -501,17 +482,13 @@
 
         function agregarProducto() {
             productoCounter++;
-            const id = productoCounter;
-            
             productos.push({
-                id: id,
+                id: productoCounter,
                 cantidad: 1,
                 descripcion: '',
                 detalles: '',
-                precioUnitario: 0,
-                imagen: null
+                precioUnitario: 0
             });
-
             renderProductos();
         }
 
@@ -588,118 +565,108 @@
                 return;
             }
 
-            if (!window.jspdf) {
-                alert('Error: Librería PDF no cargada. Refrescá la página.');
-                return;
-            }
-
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
                 const referencia = document.getElementById('referencia').value;
-                const fecha = new Date(document.getElementById('fecha').value);
+                const fechaInput = document.getElementById('fecha').value;
+                const fecha = new Date(fechaInput + 'T00:00:00');
                 const tiempoEntrega = document.getElementById('tiempoEntrega').value;
                 const lugarEntrega = document.getElementById('lugarEntrega').value;
                 const material = document.getElementById('material').value;
                 const formaPago = document.getElementById('formaPago').value;
                 const iva = parseFloat(document.getElementById('iva').value) || 0;
 
-                const fechaFormateada = fecha.toLocaleDateString('es-UY', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
+                const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                const fechaFormateada = `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
 
                 const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
                 const ivaAmount = subtotal * (iva / 100);
                 const total = subtotal + ivaAmount;
 
-                let yPos = 15;
+                let y = 15;
 
-                doc.setDrawColor(30, 58, 138);
-                doc.setLineWidth(0.5);
-                
+                // HEADER
                 doc.setFontSize(28);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(30, 58, 138);
-                doc.text('MODELO', 20, yPos);
+                doc.text('MODELO', 20, y);
                 
                 doc.setFontSize(9);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(100, 100, 100);
-                doc.text('EQUIPAMIENTO DE OFICINAS', 20, yPos + 6);
+                doc.text('EQUIPAMIENTO DE OFICINAS', 20, y + 6);
 
                 doc.setFontSize(10);
                 doc.setTextColor(60, 60, 60);
-                doc.text(`Montevideo, ${fechaFormateada}`, 200, yPos + 2, { align: 'right' });
+                doc.text('Montevideo, ' + fechaFormateada, 190, y + 2, { align: 'right' });
 
-                yPos += 15;
+                y += 15;
                 doc.setDrawColor(30, 58, 138);
                 doc.setLineWidth(1);
-                doc.line(20, yPos, 190, yPos);
-                yPos += 12;
+                doc.line(20, y, 190, y);
+                y += 12;
 
+                // CLIENTE
                 doc.setFontSize(11);
                 doc.setTextColor(50, 50, 50);
                 doc.setFont('helvetica', 'normal');
-                doc.text('Sr.', 20, yPos);
-                yPos += 6;
+                doc.text('Sr.', 20, y);
+                y += 6;
                 
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(13);
                 doc.setTextColor(220, 38, 38);
-                doc.text(cliente.toUpperCase(), 20, yPos);
+                doc.text(cliente.toUpperCase(), 20, y);
 
                 doc.setFontSize(10);
                 doc.setTextColor(30, 58, 138);
                 doc.setFont('helvetica', 'bold');
-                doc.text(`REF: ${referencia}`, 200, yPos, { align: 'right' });
+                doc.text('REF: ' + referencia, 190, y, { align: 'right' });
 
-                yPos += 8;
+                y += 8;
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(50, 50, 50);
-                doc.text('Presente', 20, yPos);
-                yPos += 8;
+                doc.text('Presente', 20, y);
+                y += 8;
 
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
                 doc.setTextColor(70, 70, 70);
-                doc.text('De nuestra consideración:', 20, yPos);
-                yPos += 5;
-                doc.text('        Por intermedio de la presente tenemos el agrado de cotizar el', 20, yPos);
-                yPos += 5;
-                doc.text('siguiente mobiliario de oficinas:', 20, yPos);
-                yPos += 10;
+                doc.text('De nuestra consideracion:', 20, y);
+                y += 5;
+                doc.text('        Por intermedio de la presente tenemos el agrado de cotizar el', 20, y);
+                y += 5;
+                doc.text('siguiente mobiliario de oficinas:', 20, y);
+                y += 10;
 
-                const tableBody = productos.map(p => [
-                    `${p.cantidad} - ${p.descripcion}${p.detalles ? '\n' + p.detalles : ''}`,
-                    p.precioUnitario.toFixed(2),
-                    (p.cantidad * p.precioUnitario).toFixed(2)
-                ]);
+                // TABLA
+                const tableData = productos.map(p => {
+                    let desc = p.cantidad + ' - ' + p.descripcion;
+                    if (p.detalles) desc += '\n' + p.detalles;
+                    return [desc, p.precioUnitario.toFixed(2), (p.cantidad * p.precioUnitario).toFixed(2)];
+                });
 
-                tableBody.push(
-                    ['', 'Sub Total U$S', subtotal.toFixed(2)],
-                    ['', `IVA ${iva}%`, ivaAmount.toFixed(2)],
-                    ['', 'TOTAL U$S', total.toFixed(2)]
-                );
+                tableData.push(['', 'Sub Total U$S', subtotal.toFixed(2)]);
+                tableData.push(['', 'IVA ' + iva + '%', ivaAmount.toFixed(2)]);
+                tableData.push(['', 'TOTAL U$S', total.toFixed(2)]);
 
                 doc.autoTable({
-                    startY: yPos,
-                    head: [['DESCRIPCIÓN', 'UNITARIO', 'TOTAL']],
-                    body: tableBody,
+                    startY: y,
+                    head: [['DESCRIPCION', 'UNITARIO', 'TOTAL']],
+                    body: tableData,
                     theme: 'grid',
                     headStyles: {
                         fillColor: [30, 58, 138],
-                        textColor: [255, 255, 255],
+                        textColor: 255,
                         fontStyle: 'bold',
                         fontSize: 10,
                         halign: 'center'
                     },
                     bodyStyles: {
                         fontSize: 9,
-                        textColor: [40, 40, 40],
                         cellPadding: 4
                     },
                     columnStyles: {
@@ -707,8 +674,10 @@
                         1: { cellWidth: 35, halign: 'right' },
                         2: { cellWidth: 35, halign: 'right', fontStyle: 'bold' }
                     },
-                    didParseCell: (data) => {
-                        if (data.section === 'body' && data.row.index >= tableBody.length - 3) {
+                    didParseCell: function(data) {
+                        const rowIndex = data.row.index;
+                        const totalRows = tableData.length;
+                        if (data.section === 'body' && rowIndex >= totalRows - 3) {
                             data.cell.styles.fillColor = [240, 248, 255];
                             data.cell.styles.fontStyle = 'bold';
                             data.cell.styles.fontSize = 10;
@@ -716,52 +685,79 @@
                     }
                 });
 
-                yPos = doc.lastAutoTable.finalY + 10;
+                y = doc.lastAutoTable.finalY + 10;
 
+                // CONDICIONES
                 doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.3);
-                doc.line(20, yPos, 190, yPos);
-                yPos += 8;
+                doc.line(20, y, 190, y);
+                y += 8;
 
-                [[' MATERIAL', material], ['FORMA DE PAGO', formaPago], ['TIEMPO DE ENTREGA', tiempoEntrega, true], ['LUGAR DE ENTREGA', lugarEntrega]].forEach(([label, valor, destacado]) => {
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(30, 58, 138);
-                    doc.setFontSize(9);
-                    doc.text(`•${label}:`, 20, yPos);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(destacado ? [220, 38, 38] : [60, 60, 60]);
-                    doc.text(valor, 75, yPos);
-                    yPos += 6;
-                });
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(30, 58, 138);
+                doc.setFontSize(9);
+                
+                doc.text('• MATERIAL:', 20, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60, 60, 60);
+                doc.text(material, 75, y);
+                y += 6;
 
-                yPos += 5;
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(30, 58, 138);
+                doc.text('• FORMA DE PAGO:', 20, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60, 60, 60);
+                doc.text(formaPago, 75, y);
+                y += 6;
+
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(30, 58, 138);
+                doc.text('• TIEMPO DE ENTREGA:', 20, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(220, 38, 38);
+                doc.text(tiempoEntrega, 75, y);
+                y += 6;
+
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(30, 58, 138);
+                doc.text('• LUGAR DE ENTREGA:', 20, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60, 60, 60);
+                doc.text(lugarEntrega, 75, y);
+                y += 11;
+
+                // FIRMA
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
                 doc.setTextColor(50, 50, 50);
-                doc.text('Atte.', 20, yPos);
+                doc.text('Atte.', 20, y);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Favio Couñago', 34, yPos);
+                doc.text('Favio Counago', 34, y);
 
-                yPos = 280;
+                // FOOTER
+                y = 280;
                 doc.setDrawColor(30, 58, 138);
                 doc.setLineWidth(1);
-                doc.line(20, yPos - 5, 190, yPos - 5);
+                doc.line(20, y - 5, 190, y - 5);
+                
                 doc.setFontSize(9);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(220, 38, 38);
-                doc.text('Emilio Frugoni 1250 esq. Constituyente  •  Tel: 24-11-47-47', 105, yPos, { align: 'center' });
+                doc.text('Emilio Frugoni 1250 esq. Constituyente  •  Tel: 24-11-47-47', 105, y, { align: 'center' });
+                
                 doc.setTextColor(30, 58, 138);
                 doc.setFont('helvetica', 'bold');
-                doc.text('www.modeloequipamientos.com', 105, yPos + 5, { align: 'center' });
+                doc.text('www.modeloequipamientos.com', 105, y + 5, { align: 'center' });
 
-                const filename = `Presupuesto_${cliente.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                const filename = 'Presupuesto_' + cliente.replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf';
                 doc.save(filename);
 
                 mostrarAlerta('✅ PDF generado exitosamente', 'success');
                 
             } catch (error) {
-                console.error('Error generando PDF:', error);
-                alert('Error: ' + error.message + '\n\nRefrescá la página e intentá de nuevo.');
+                console.error('Error:', error);
+                alert('Error al generar PDF: ' + error.message);
             }
         }
 
@@ -855,15 +851,8 @@
         }
 
         function regenerarPDF(id) {
-            const presupuestos = loadFromStorage();
-            const p = presupuestos.find(pr => pr.id === id);
-            if (!p) return;
-
             cargarPresupuesto(id);
-            
-            setTimeout(() => {
-                generarYDescargarPDF();
-            }, 100);
+            setTimeout(() => generarYDescargarPDF(), 100);
         }
 
         function switchTab(tab) {
@@ -884,25 +873,15 @@
         function mostrarAlerta(mensaje, tipo) {
             const alert = document.getElementById('successAlert');
             alert.textContent = mensaje;
-            alert.className = `alert alert-${tipo}`;
+            alert.className = 'alert alert-' + tipo;
             alert.classList.remove('hidden');
-            
-            setTimeout(() => {
-                alert.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => alert.classList.add('hidden'), 3000);
         }
 
         function inicializarApp() {
             document.getElementById('fecha').valueAsDate = new Date();
             agregarProducto();
             cargarHistorial();
-            
-            setTimeout(() => {
-                if (!window.jspdf) {
-                    console.error('jsPDF no se cargó correctamente');
-                    alert('Advertencia: El generador de PDF no se cargó. Refrescá la página (F5).');
-                }
-            }, 2000);
         }
 
         checkAuth();
