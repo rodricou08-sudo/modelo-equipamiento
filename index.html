@@ -115,17 +115,12 @@
             gap: 15px;
         }
 
-        .productos-section {
-            margin-top: 30px;
-        }
-
         .producto-item {
             background: #f8fafc;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 15px;
-            position: relative;
             transition: all 0.3s;
         }
 
@@ -168,10 +163,6 @@
 
         .btn-remove:hover {
             background: #dc2626;
-        }
-
-        .image-upload {
-            margin-bottom: 15px;
         }
 
         .image-preview {
@@ -329,7 +320,6 @@
     </style>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen">
         <div class="container">
             <div class="panel header">
@@ -360,7 +350,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="mainApp" class="hidden">
         <div class="container">
             <div class="panel header">
@@ -368,7 +357,6 @@
                 <p>Modelo Equipamientos</p>
             </div>
 
-            <!-- TABS -->
             <div class="panel" style="grid-column: 1 / -1;">
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab('nuevo')">Nuevo Presupuesto</button>
@@ -376,9 +364,7 @@
                 </div>
             </div>
 
-            <!-- TAB: NUEVO PRESUPUESTO -->
             <div id="tabNuevo">
-                <!-- FORMULARIO -->
                 <div class="panel">
                     <h2 class="section-title">Datos del Presupuesto</h2>
                     
@@ -437,10 +423,9 @@
                     <button class="btn btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
                 </div>
 
-                <!-- PREVIEW -->
                 <div class="panel">
                     <h2 class="section-title">Vista Previa</h2>
-                    <div class="preview-container" id="previewContainer">
+                    <div class="preview-container">
                         <div class="preview-text">
                             <h3>📄 Vista Previa del PDF</h3>
                             <p>Completá los datos y agregá productos.<br>El PDF se generará cuando presiones "Generar PDF".</p>
@@ -449,7 +434,6 @@
                 </div>
             </div>
 
-            <!-- TAB: HISTORIAL -->
             <div id="tabHistorial" class="hidden">
                 <div class="panel" style="grid-column: 1 / -1;">
                     <h2 class="section-title">Presupuestos Guardados</h2>
@@ -460,7 +444,6 @@
     </div>
 
     <script>
-        // ==================== STORAGE ====================
         const STORAGE_KEY = 'modelo_presupuestos';
         const USER_KEY = 'modelo_user';
 
@@ -483,12 +466,10 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(presupuestos));
         }
 
-        // ==================== LOGIN ====================
         function login() {
             const user = document.getElementById('loginUser').value;
             const pass = document.getElementById('loginPass').value;
             
-            // Demo credentials
             if (user === 'modelo' && pass === 'modelo2025') {
                 localStorage.setItem(USER_KEY, user);
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -515,7 +496,6 @@
             }
         }
 
-        // ==================== PRODUCTOS ====================
         let productos = [];
         let productoCounter = 0;
 
@@ -563,14 +543,14 @@
 
                     <div class="form-group">
                         <label>Descripción Principal</label>
-                        <input type="text" placeholder="Ej: Mesadas de 240x60x76 alto Tapa Roble Tropical de 38mm"
+                        <input type="text" placeholder="Ej: Mesadas de 240x60x76 alto"
                             value="${p.descripcion}"
                             onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">
                     </div>
 
                     <div class="form-group">
                         <label>Detalles (opcional)</label>
-                        <textarea placeholder="Ej: con base de 4 patas en aluminio cuadradas de 6cm&#10;con 1 cajonera de 2 cajones con cerradura..."
+                        <textarea placeholder="Ej: con base de 4 patas en aluminio..."
                             onchange="actualizarProducto(${p.id}, 'detalles', this.value)">${p.detalles}</textarea>
                     </div>
 
@@ -578,12 +558,6 @@
                         <label>Precio Unitario (U$S)</label>
                         <input type="number" min="0" step="0.01" value="${p.precioUnitario}"
                             onchange="actualizarProducto(${p.id}, 'precioUnitario', parseFloat(this.value))">
-                    </div>
-
-                    <div class="form-group image-upload">
-                        <label>Imagen del Producto (opcional - aparecerá en el PDF)</label>
-                        <input type="file" accept="image/*" onchange="cargarImagen(${p.id}, this)">
-                        ${p.imagen ? `<img src="${p.imagen}" class="image-preview">` : ''}
                     </div>
 
                     <div style="background: #e0f2fe; padding: 12px; border-radius: 6px; text-align: center; font-weight: 700; color: #0c4a6e;">
@@ -601,19 +575,7 @@
             }
         }
 
-        function cargarImagen(id, input) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    actualizarProducto(id, 'imagen', e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // ==================== PDF GENERATION (MEJORADO) ====================
-        async function generarYDescargarPDF() {
+        function generarYDescargarPDF() {
             const cliente = document.getElementById('cliente').value;
             
             if (!cliente) {
@@ -655,11 +617,9 @@
 
                 let yPos = 15;
 
-                // ===== HEADER MEJORADO =====
                 doc.setDrawColor(30, 58, 138);
                 doc.setLineWidth(0.5);
                 
-                // Logo text más grande y bold
                 doc.setFontSize(28);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(30, 58, 138);
@@ -670,7 +630,6 @@
                 doc.setTextColor(100, 100, 100);
                 doc.text('EQUIPAMIENTO DE OFICINAS', 20, yPos + 6);
 
-                // Fecha más clara
                 doc.setFontSize(10);
                 doc.setTextColor(60, 60, 60);
                 doc.text(`Montevideo, ${fechaFormateada}`, 200, yPos + 2, { align: 'right' });
@@ -681,7 +640,6 @@
                 doc.line(20, yPos, 190, yPos);
                 yPos += 12;
 
-                // ===== CLIENTE =====
                 doc.setFontSize(11);
                 doc.setTextColor(50, 50, 50);
                 doc.setFont('helvetica', 'normal');
@@ -693,7 +651,6 @@
                 doc.setTextColor(220, 38, 38);
                 doc.text(cliente.toUpperCase(), 20, yPos);
 
-                // Referencia
                 doc.setFontSize(10);
                 doc.setTextColor(30, 58, 138);
                 doc.setFont('helvetica', 'bold');
@@ -716,32 +673,17 @@
                 doc.text('siguiente mobiliario de oficinas:', 20, yPos);
                 yPos += 10;
 
-                // ===== TABLA DE PRODUCTOS CON IMÁGENES =====
-                const tableBody = [];
-                
-                for (const p of productos) {
-                    const row = [];
-                    
-                    // Columna 1: Descripción + Imagen
-                    let descripcionCompleta = `${p.cantidad} - ${p.descripcion}`;
-                    if (p.detalles) {
-                        descripcionCompleta += `\n${p.detalles}`;
-                    }
-                    row.push(descripcionCompleta);
-                    
-                    // Columna 2: Unitario
-                    row.push(`${p.precioUnitario.toFixed(2)}`);
-                    
-                    // Columna 3: Total
-                    row.push(`${(p.cantidad * p.precioUnitario).toFixed(2)}`);
-                    
-                    tableBody.push(row);
-                }
+                const tableBody = productos.map(p => [
+                    `${p.cantidad} - ${p.descripcion}${p.detalles ? '\n' + p.detalles : ''}`,
+                    p.precioUnitario.toFixed(2),
+                    (p.cantidad * p.precioUnitario).toFixed(2)
+                ]);
 
-                // Agregar filas de totales
-                tableBody.push(['', 'Sub Total U$S', subtotal.toFixed(2)]);
-                tableBody.push(['', `IVA ${iva}%`, `${ivaAmount.toFixed(2)}`]);
-                tableBody.push(['', 'TOTAL U$S', total.toFixed(2)]);
+                tableBody.push(
+                    ['', 'Sub Total U$S', subtotal.toFixed(2)],
+                    ['', `IVA ${iva}%`, ivaAmount.toFixed(2)],
+                    ['', 'TOTAL U$S', total.toFixed(2)]
+                );
 
                 doc.autoTable({
                     startY: yPos,
@@ -761,33 +703,11 @@
                         cellPadding: 4
                     },
                     columnStyles: {
-                        0: { cellWidth: 110, valign: 'top' },
-                        1: { cellWidth: 35, halign: 'right', valign: 'middle' },
-                        2: { cellWidth: 35, halign: 'right', valign: 'middle', fontStyle: 'bold' }
-                    },
-                    didDrawCell: async (data) => {
-                        // Agregar imágenes en la primera columna
-                        if (data.column.index === 0 && data.section === 'body') {
-                            const productoIndex = data.row.index;
-                            if (productoIndex < productos.length) {
-                                const producto = productos[productoIndex];
-                                if (producto.imagen) {
-                                    try {
-                                        const imgX = data.cell.x + 2;
-                                        const imgY = data.cell.y + data.cell.height - 25;
-                                        const imgWidth = 20;
-                                        const imgHeight = 20;
-                                        
-                                        doc.addImage(producto.imagen, 'JPEG', imgX, imgY, imgWidth, imgHeight);
-                                    } catch (e) {
-                                        console.log('Error agregando imagen:', e);
-                                    }
-                                }
-                            }
-                        }
+                        0: { cellWidth: 110 },
+                        1: { cellWidth: 35, halign: 'right' },
+                        2: { cellWidth: 35, halign: 'right', fontStyle: 'bold' }
                     },
                     didParseCell: (data) => {
-                        // Resaltar filas de totales
                         if (data.section === 'body' && data.row.index >= tableBody.length - 3) {
                             data.cell.styles.fillColor = [240, 248, 255];
                             data.cell.styles.fontStyle = 'bold';
@@ -798,38 +718,23 @@
 
                 yPos = doc.lastAutoTable.finalY + 10;
 
-                // ===== CONDICIONES MEJORADAS =====
                 doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.3);
                 doc.line(20, yPos, 190, yPos);
                 yPos += 8;
 
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(30, 58, 138);
-                
-                const condiciones = [
-                    { label: 'MATERIAL', valor: material },
-                    { label: 'FORMA DE PAGO', valor: formaPago },
-                    { label: 'TIEMPO DE ENTREGA', valor: tiempoEntrega, destacado: true },
-                    { label: 'LUGAR DE ENTREGA', valor: lugarEntrega }
-                ];
-
-                condiciones.forEach((cond, idx) => {
+                [[' MATERIAL', material], ['FORMA DE PAGO', formaPago], ['TIEMPO DE ENTREGA', tiempoEntrega, true], ['LUGAR DE ENTREGA', lugarEntrega]].forEach(([label, valor, destacado]) => {
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(30, 58, 138);
-                    doc.text(`• ${cond.label}:`, 20, yPos);
-                    
+                    doc.setFontSize(9);
+                    doc.text(`•${label}:`, 20, yPos);
                     doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(cond.destacado ? [220, 38, 38] : [60, 60, 60]);
-                    doc.text(cond.valor, 75, yPos);
-                    
+                    doc.setTextColor(destacado ? [220, 38, 38] : [60, 60, 60]);
+                    doc.text(valor, 75, yPos);
                     yPos += 6;
                 });
 
                 yPos += 5;
-
-                // ===== FIRMA =====
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
                 doc.setTextColor(50, 50, 50);
@@ -837,34 +742,29 @@
                 doc.setFont('helvetica', 'bold');
                 doc.text('Favio Couñago', 34, yPos);
 
-                // ===== FOOTER MEJORADO =====
                 yPos = 280;
                 doc.setDrawColor(30, 58, 138);
                 doc.setLineWidth(1);
                 doc.line(20, yPos - 5, 190, yPos - 5);
-                
                 doc.setFontSize(9);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(220, 38, 38);
                 doc.text('Emilio Frugoni 1250 esq. Constituyente  •  Tel: 24-11-47-47', 105, yPos, { align: 'center' });
-                
                 doc.setTextColor(30, 58, 138);
                 doc.setFont('helvetica', 'bold');
                 doc.text('www.modeloequipamientos.com', 105, yPos + 5, { align: 'center' });
 
-                // ===== DESCARGAR =====
                 const filename = `Presupuesto_${cliente.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
                 doc.save(filename);
 
-                mostrarAlerta('✅ PDF generado exitosamente con diseño profesional', 'success');
+                mostrarAlerta('✅ PDF generado exitosamente', 'success');
                 
             } catch (error) {
                 console.error('Error generando PDF:', error);
-                alert('Error al generar el PDF:\n' + error.message + '\n\nIntentá de nuevo o contactá soporte.');
+                alert('Error: ' + error.message + '\n\nRefrescá la página e intentá de nuevo.');
             }
         }
 
-        // ==================== GUARDAR PRESUPUESTO ====================
         function guardarPresupuesto() {
             const cliente = document.getElementById('cliente').value;
             
@@ -894,7 +794,6 @@
             cargarHistorial();
         }
 
-        // ==================== HISTORIAL ====================
         function cargarHistorial() {
             const presupuestos = loadFromStorage();
             const container = document.getElementById('historialContainer');
@@ -967,7 +866,6 @@
             }, 100);
         }
 
-        // ==================== TABS ====================
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             
@@ -983,7 +881,6 @@
             }
         }
 
-        // ==================== UTILS ====================
         function mostrarAlerta(mensaje, tipo) {
             const alert = document.getElementById('successAlert');
             alert.textContent = mensaje;
