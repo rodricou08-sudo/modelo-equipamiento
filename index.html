@@ -344,7 +344,7 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
 
-                // ========== CONFIGURACIÓN ==========
+                // ========== CONFIG ==========
                 const pageW = 210;
                 const pageH = 297;
                 const mL = 15;
@@ -375,58 +375,61 @@
                 doc.setLineWidth(0.7);
                 doc.rect(10, 10, 190, 277);
 
-                // ========== LOGO: 3 paralelogramos sólidos ==========
-                // Barras anchas, muy juntas, inclinadas levemente hacia arriba derecha
+                // ========== LOGO: "M" estilizada (3 barras formando una M) ==========
+                // Basado en el logo real: 3 barras inclinadas que forman una M visual,
+                // agrupadas y compactas, con aspecto sólido y profesional
                 const logoX = 18;
-                const logoY = 17;
-                const bW = 5;
-                const bH = 8;
-                const bGap = 0.8;
-                const lean = 3;
+                const logoY = 15;
+                const logoH = 13;         // altura total del logo
+                const bW = 5.5;           // ancho de cada barra
+                const bGap = 0.6;         // separación mínima entre barras
+                const lean = 3.5;         // inclinación de las barras
 
                 doc.setFillColor(0, 0, 0);
+                // Las 3 barras inclinadas (cada una es un paralelogramo)
                 for (let i = 0; i < 3; i++) {
                     const x = logoX + i * (bW + bGap);
+                    // Triángulo 1: esquina inf-izq, inf-der, sup-der (inclinada)
                     doc.triangle(
-                        x, logoY + bH,
-                        x + bW, logoY + bH,
-                        x + bW + lean, logoY,
+                        x,              logoY + logoH,
+                        x + bW,         logoY + logoH,
+                        x + bW + lean,  logoY,
                         'F'
                     );
+                    // Triángulo 2: esquina inf-izq, sup-der (inclinada), sup-izq (inclinada)
                     doc.triangle(
-                        x, logoY + bH,
-                        x + bW + lean, logoY,
-                        x + lean, logoY,
+                        x,              logoY + logoH,
+                        x + bW + lean,  logoY,
+                        x + lean,       logoY,
                         'F'
                     );
                 }
 
-                // Texto del logo: "modelo" bold grande + subtítulo chico espaciado
-                const logoTextX = logoX + 3 * (bW + bGap) + lean + 2;
+                // ========== TEXTO DEL LOGO ==========
+                // "MODELO" arriba y "EQUIPAMIENTOS" abajo, MISMO tamaño, MISMO peso,
+                // tipografía sans-serif seria (helvetica bold uppercase)
+                const logoTextX = logoX + 3 * (bW + bGap) + lean + 4;
                 
                 doc.setFont('helvetica', 'bold');
-                doc.setFontSize(22);
+                doc.setFontSize(17);
                 doc.setTextColor(0, 0, 0);
-                doc.text('modelo', logoTextX, logoY + 7);
+                doc.text('MODELO', logoTextX, logoY + 6);
+                doc.text('EQUIPAMIENTOS', logoTextX, logoY + 13);
 
+                // ========== FECHA DERECHA ==========
+                // Sin ",-" al final, sin espacios extra
                 doc.setFont('helvetica', 'normal');
-                doc.setFontSize(7);
-                doc.setTextColor(80, 80, 80);
-                doc.text('e q u i p a m i e n t o   d e   o f i c i n a s', logoTextX + 1, logoY + 11);
-
-                // ========== FECHA (derecha) ==========
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(12);
+                doc.setFontSize(11);
                 doc.setTextColor(0, 0, 0);
-                doc.text('Montevideo , ' + fechaTxt + ',-', mR, 22, { align: 'right' });
+                doc.text('Montevideo, ' + fechaTxt, mR, 22, { align: 'right' });
 
-                // ========== LÍNEA SEPARADORA HEADER ==========
+                // ========== LÍNEA SEPARADORA ==========
                 doc.setDrawColor(0, 0, 0);
                 doc.setLineWidth(0.5);
-                doc.line(mL, 31, mR, 31);
+                doc.line(mL, 32, mR, 32);
 
-                // ========== Sres. + nombre cliente + REF ==========
-                let y = 39;
+                // ========== Sres. + Cliente + REF ==========
+                let y = 40;
                 
                 doc.setFont('helvetica', 'bolditalic');
                 doc.setFontSize(12);
@@ -444,7 +447,7 @@
                 doc.setTextColor(0, 0, 0);
                 doc.text('REF : ' + referencia, mR, y, { align: 'right' });
 
-                // Presente con subrayado exacto
+                // Presente
                 y += 6;
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(11);
@@ -462,7 +465,7 @@
                 doc.setTextColor(0, 0, 0);
                 doc.text('De nuestra consideracion :', mL, y);
 
-                // Párrafo intro (primera línea indentada)
+                // Intro
                 y += 6;
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
@@ -524,14 +527,13 @@
 
                 let yTab = doc.lastAutoTable.finalY;
 
-                // ========== BLOQUE DE TOTALES (al costado derecho, bajo la tabla) ==========
+                // ========== BLOQUE DE TOTALES ==========
                 const totCol1X = mL + 115;
                 const totCol2X = mL + 115 + 32;
                 const totW1 = 32;
                 const totW2 = 33;
                 const rowH = 6.5;
 
-                // sub Total
                 doc.setDrawColor(0, 0, 0);
                 doc.setLineWidth(0.4);
                 doc.rect(totCol1X, yTab, totW1, rowH);
@@ -543,7 +545,6 @@
                 doc.setFont('helvetica', 'bold');
                 doc.text(subtotal.toFixed(2).replace('.', ','), totCol2X + totW2 - 2, yTab + 4.3, { align: 'right' });
 
-                // IVA
                 const yIva = yTab + rowH;
                 doc.rect(totCol1X, yIva, totW1, rowH);
                 doc.rect(totCol2X, yIva, totW2, rowH);
@@ -552,7 +553,6 @@
                 doc.setFont('helvetica', 'bold');
                 doc.text(ivaAmt.toFixed(2).replace('.', ','), totCol2X + totW2 - 2, yIva + 4.3, { align: 'right' });
 
-                // TOTAL (fondo celeste)
                 const yTot = yIva + rowH;
                 doc.setFillColor(celeste[0], celeste[1], celeste[2]);
                 doc.rect(totCol1X, yTot, totW1, rowH, 'F');
@@ -566,43 +566,41 @@
                 doc.text('TOTAL   U$S', totCol1X + totW1 - 2, yTot + 4.4, { align: 'right' });
                 doc.text(total.toFixed(2).replace('.', ','), totCol2X + totW2 - 2, yTot + 4.4, { align: 'right' });
 
-                // ========== CONDICIONES (al lado izquierdo, al lado de los totales) ==========
-                let yC = yTab + 2;
-                const labelX = mL + 2;
-                const valueX = mL + 42;
+                // ========== CONDICIONES (compactas, pegadas a la izquierda) ==========
+                // Formato: "- ETIQUETA : valor" con UN solo espacio antes y después de :
+                let yC = yTab + 4;
 
                 doc.setFontSize(10);
                 doc.setTextColor(0, 0, 0);
 
-                // MATERIAL
-                doc.setFont('helvetica', 'bold');
-                doc.text('- MATERIAL', labelX, yC + 3);
-                doc.text(':', valueX - 2, yC + 3);
-                doc.text(material, valueX + 2, yC + 3);
+                // Helper para dibujar cada línea: "- LABEL : valor"
+                // Usa string concatenado en vez de posiciones absolutas, para que no
+                // haya espacios raros entre elementos
+                function drawCondicion(label, value, yPos, valueRojo) {
+                    // Parte bold: "- LABEL : "
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(0, 0, 0);
+                    const labelTxt = '- ' + label + ' : ';
+                    doc.text(labelTxt, mL, yPos);
+                    const labelW = doc.getTextWidth(labelTxt);
+                    // Parte valor
+                    doc.setFont('helvetica', 'bold');
+                    if (valueRojo) {
+                        doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+                    } else {
+                        doc.setTextColor(0, 0, 0);
+                    }
+                    doc.text(value, mL + labelW, yPos);
+                }
 
-                // FORMA DE PAGO (valor en rojo)
-                yC += 6.5;
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 0, 0);
-                doc.text('- FORMA DE PAGO', labelX, yC + 3);
-                doc.text(':', valueX - 2, yC + 3);
-                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
-                doc.text(formaPago, valueX + 2, yC + 3);
-
-                // TIEMPO DE ENTREGA (valor en rojo)
-                yC += 6.5;
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 0, 0);
-                doc.text('- TIEMPO DE ENTREGA :', labelX, yC + 3);
-                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
-                doc.text(tiempoEntrega, valueX + 10, yC + 3);
-
-                // LUGAR DE ENTREGA
-                yC += 6.5;
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 0, 0);
-                doc.text('- LUGAR DE ENTREGA  :', labelX, yC + 3);
-                doc.text(lugarEntrega + ',-', valueX + 10, yC + 3);
+                yC += 3;
+                drawCondicion('MATERIAL', material, yC, false);
+                yC += 6;
+                drawCondicion('FORMA DE PAGO', formaPago, yC, true);
+                yC += 6;
+                drawCondicion('TIEMPO DE ENTREGA', tiempoEntrega, yC, true);
+                yC += 6;
+                drawCondicion('LUGAR DE ENTREGA', lugarEntrega + ',-', yC, false);
 
                 yC += 10;
                 const yBajoTotales = yTot + rowH + 4;
