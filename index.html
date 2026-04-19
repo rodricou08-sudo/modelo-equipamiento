@@ -1,890 +1,357 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presupuestos - Modelo Equipamientos</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .header {
-            grid-column: 1 / -1;
-            text-align: center;
-            background: white;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            color: #1e3a8a;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            color: #64748b;
-            font-size: 16px;
-        }
-
-        .login-panel {
-            grid-column: 1 / -1;
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e3a8a;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #3b82f6;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .producto-item {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-
-        .producto-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-        }
-
-        .producto-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .producto-number {
-            background: #3b82f6;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .btn-remove {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .btn-remove:hover {
-            background: #dc2626;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-            margin-top: 0;
-        }
-
-        .btn-logout {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            margin-top: 20px;
-        }
-
-        .preview-container {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 8px;
-            min-height: 400px;
-        }
-
-        .preview-text {
-            color: #64748b;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .historial-item {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .historial-item:hover {
-            border-color: #3b82f6;
-            transform: translateX(4px);
-        }
-
-        .historial-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .historial-cliente {
-            font-weight: 700;
-            color: #1e3a8a;
-            font-size: 16px;
-        }
-
-        .historial-fecha {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .historial-total {
-            font-size: 20px;
-            font-weight: 800;
-            color: #10b981;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            color: #1e3a8a;
-            border-bottom-color: #3b82f6;
-        }
-
-        .tab:hover {
-            color: #1e3a8a;
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-    </style>
-</head>
-<body>
-    <div id="loginScreen">
-        <div class="container">
-            <div class="panel header">
-                <h1>🏢 Modelo Equipamientos</h1>
-                <p>Sistema de Generación de Presupuestos</p>
-            </div>
-            
-            <div class="panel login-panel">
-                <h2 class="section-title">Iniciar Sesión</h2>
-                <div id="loginError" class="alert alert-error hidden"></div>
-                
-                <div class="form-group">
-                    <label>Usuario</label>
-                    <input type="text" id="loginUser" placeholder="modelo">
-                </div>
-                
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="loginPass" placeholder="••••••••">
-                </div>
-                
-                <button class="btn" onclick="login()">Ingresar</button>
-                
-                <p style="margin-top: 20px; text-align: center; color: #64748b; font-size: 13px;">
-                    <strong>Demo:</strong> usuario: <code>modelo</code> / contraseña: <code>modelo2025</code>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div id="mainApp" class="hidden">
-        <div class="container">
-            <div class="panel header">
-                <h1>📋 Generador de Presupuestos</h1>
-                <p>Modelo Equipamientos</p>
-            </div>
-
-            <div class="panel" style="grid-column: 1 / -1;">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('nuevo')">Nuevo Presupuesto</button>
-                    <button class="tab" onclick="switchTab('historial')">Historial</button>
-                </div>
-            </div>
-
-            <div id="tabNuevo">
-                <div class="panel">
-                    <h2 class="section-title">Datos del Presupuesto</h2>
-                    
-                    <div id="successAlert" class="alert alert-success hidden"></div>
-                    
-                    <div class="form-group">
-                        <label>Cliente</label>
-                        <input type="text" id="cliente" placeholder="Ej: Gabriel De Leon">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Referencia</label>
-                        <input type="text" id="referencia" value="MOBILIARIO de OFICINA">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Fecha</label>
-                            <input type="date" id="fecha">
-                        </div>
-                        <div class="form-group">
-                            <label>Tiempo de Entrega</label>
-                            <input type="text" id="tiempoEntrega" value="8 días hábiles">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Lugar de Entrega</label>
-                        <input type="text" id="lugarEntrega" value="Montevideo">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Material</label>
-                            <input type="text" id="material" value="Material melamínico 18 y 38 mm">
-                        </div>
-                        <div class="form-group">
-                            <label>Forma de Pago</label>
-                            <input type="text" id="formaPago" value="Seña 50% y saldo contra entrega">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>IVA (%)</label>
-                        <input type="number" id="iva" value="22" min="0" max="100">
-                    </div>
-
-                    <h2 class="section-title" style="margin-top: 40px;">Productos</h2>
-                    
-                    <div id="productosContainer"></div>
-
-                    <button class="btn btn-add" onclick="agregarProducto()">+ Agregar Producto</button>
-
-                    <button class="btn btn-secondary" onclick="generarYDescargarPDF()">📄 Generar PDF</button>
-                    <button class="btn" onclick="guardarPresupuesto()">💾 Guardar Presupuesto</button>
-                    <button class="btn btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
-                </div>
-
-                <div class="panel">
-                    <h2 class="section-title">Vista Previa</h2>
-                    <div class="preview-container">
-                        <div class="preview-text">
-                            <h3>📄 Vista Previa del PDF</h3>
-                            <p>Completá los datos y agregá productos.<br>El PDF se generará cuando presiones "Generar PDF".</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tabHistorial" class="hidden">
-                <div class="panel" style="grid-column: 1 / -1;">
-                    <h2 class="section-title">Presupuestos Guardados</h2>
-                    <div id="historialContainer"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const STORAGE_KEY = 'modelo_presupuestos';
-        const USER_KEY = 'modelo_user';
-
-        function saveToStorage(presupuesto) {
-            const presupuestos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            presupuesto.id = Date.now();
-            presupuesto.fechaCreacion = new Date().toISOString();
-            presupuestos.push(presupuesto);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(presupuestos));
-            return presupuesto.id;
-        }
-
-        function loadFromStorage() {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        }
-
-        function deleteFromStorage(id) {
-            let presupuestos = loadFromStorage();
-            presupuestos = presupuestos.filter(p => p.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(presupuestos));
-        }
-
-        function login() {
-            const user = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
-            
-            if (user === 'modelo' && pass === 'modelo2025') {
-                localStorage.setItem(USER_KEY, user);
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                inicializarApp();
-            } else {
-                const errorDiv = document.getElementById('loginError');
-                errorDiv.textContent = 'Usuario o contraseña incorrectos';
-                errorDiv.classList.remove('hidden');
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem(USER_KEY);
-            location.reload();
-        }
-
-        function checkAuth() {
-            const user = localStorage.getItem(USER_KEY);
-            if (user) {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                inicializarApp();
-            }
-        }
-
-        let productos = [];
-        let productoCounter = 0;
-
-        function agregarProducto() {
-            productoCounter++;
-            productos.push({
-                id: productoCounter,
-                cantidad: 1,
-                descripcion: '',
-                detalles: '',
-                precioUnitario: 0
+function generarYDescargarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // ==================== CONFIGURACIÓN GENERAL ====================
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const marginX = 15;
+    const contentWidth = pageWidth - (marginX * 2);
+    
+    // Colores
+    const rojo = [204, 0, 0];
+    const negro = [0, 0, 0];
+    const azul = [0, 0, 238];
+    const celeste = [220, 235, 245]; // Para el TOTAL final
+    
+    // ==================== BORDE GENERAL DE LA PÁGINA ====================
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.6);
+    doc.rect(10, 10, 190, 277);
+    
+    // ==================== HEADER: LOGO ====================
+    // 3 barras inclinadas paralelas, muy juntas (estilo ///)
+    const logoX = 20;
+    const logoY = 18;
+    const barWidth = 2.2;
+    const barHeight = 9;
+    const barSpacing = 1.2; // Espacio entre barras (juntas)
+    const skew = 3; // Inclinación de las barras
+    
+    doc.setFillColor(0, 0, 0);
+    for (let i = 0; i < 3; i++) {
+        const x = logoX + (i * (barWidth + barSpacing));
+        // Dibujar paralelogramo inclinado usando triangles
+        doc.triangle(
+            x, logoY + barHeight,
+            x + skew, logoY,
+            x + barWidth + skew, logoY,
+            'F'
+        );
+        doc.triangle(
+            x, logoY + barHeight,
+            x + barWidth + skew, logoY,
+            x + barWidth, logoY + barHeight,
+            'F'
+        );
+    }
+    
+    // Texto del logo al lado de las barras
+    const textoLogoX = logoX + (3 * (barWidth + barSpacing)) + skew + 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(0, 0, 0);
+    doc.text('modelo', textoLogoX, logoY + 6);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text('equipamientos de oficinas', textoLogoX, logoY + 10);
+    
+    // ==================== HEADER: FECHA ====================
+    const hoy = new Date();
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const fechaTexto = `Montevideo , ${hoy.getDate()} de ${meses[hoy.getMonth()]} del ${hoy.getFullYear()},-`;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(fechaTexto, pageWidth - marginX, 26, { align: 'right' });
+    
+    // Línea separadora gruesa debajo del header
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.8);
+    doc.line(marginX, 32, pageWidth - marginX, 32);
+    
+    // ==================== DATOS DEL CLIENTE ====================
+    let yPos = 40;
+    
+    // "Sres." en rojo bold
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+    doc.text('Sres.', marginX, yPos);
+    
+    // REF a la derecha (mismo nivel que Sres.)
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text('REF : MOBILIARIO DE OFICINA', pageWidth - marginX, yPos, { align: 'right' });
+    
+    // Nombre del cliente en rojo bold
+    yPos += 6;
+    const nombreCliente = (document.getElementById('cliente').value || 'Cliente').toUpperCase();
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+    doc.text(nombreCliente, marginX, yPos);
+    
+    // "Presente" con subrayado exacto al ancho
+    yPos += 6;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    const textoPresente = 'Presente';
+    doc.text(textoPresente, marginX, yPos);
+    const anchoPresente = doc.getTextWidth(textoPresente);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, yPos + 0.8, marginX + anchoPresente, yPos + 0.8);
+    
+    // ==================== INTRO ====================
+    yPos += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text('De nuestra consideracion :', marginX, yPos);
+    
+    yPos += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('                 Por intermedio de la presente tenemos el', marginX, yPos);
+    yPos += 5;
+    doc.text('agrado de cotizar el siguiente mobiliario de oficinas :', marginX, yPos);
+    
+    // ==================== TABLA DE PRODUCTOS ====================
+    yPos += 8;
+    
+    // Obtener productos (asume que existen en localStorage o en el DOM)
+    // Adaptar según cómo los tengas en tu app actual
+    const productos = obtenerProductosDelFormulario();
+    
+    // Construir filas de la tabla
+    const filasTabla = [];
+    let subtotal = 0;
+    
+    productos.forEach(p => {
+        const totalLinea = p.cantidad * p.precio;
+        subtotal += totalLinea;
+        
+        // Línea principal: "N - Descripción principal"
+        // Líneas secundarias con indent
+        let descripcionFormateada = `${p.cantidad} - ${p.descripcionPrincipal}`;
+        if (p.detalles && p.detalles.length > 0) {
+            p.detalles.forEach(d => {
+                descripcionFormateada += `\n   ${d}`;
             });
-            renderProductos();
         }
-
-        function eliminarProducto(id) {
-            productos = productos.filter(p => p.id !== id);
-            renderProductos();
+        if (p.material) {
+            descripcionFormateada += `\n   ${p.material}`;
         }
-
-        function renderProductos() {
-            const container = document.getElementById('productosContainer');
-            
-            if (productos.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">No hay productos agregados</p>';
-                return;
-            }
-
-            container.innerHTML = productos.map((p, index) => `
-                <div class="producto-item">
-                    <div class="producto-header">
-                        <div class="producto-number">${index + 1}</div>
-                        <button class="btn-remove" onclick="eliminarProducto(${p.id})">✕ Eliminar</button>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Cantidad</label>
-                        <input type="number" min="1" value="${p.cantidad}" 
-                            onchange="actualizarProducto(${p.id}, 'cantidad', parseFloat(this.value))">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Descripción Principal</label>
-                        <input type="text" placeholder="Ej: Mesadas de 240x60x76 alto"
-                            value="${p.descripcion}"
-                            onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Detalles (opcional)</label>
-                        <textarea placeholder="Ej: con base de 4 patas en aluminio..."
-                            onchange="actualizarProducto(${p.id}, 'detalles', this.value)">${p.detalles}</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Precio Unitario (U$S)</label>
-                        <input type="number" min="0" step="0.01" value="${p.precioUnitario}"
-                            onchange="actualizarProducto(${p.id}, 'precioUnitario', parseFloat(this.value))">
-                    </div>
-
-                    <div style="background: #e0f2fe; padding: 12px; border-radius: 6px; text-align: center; font-weight: 700; color: #0c4a6e;">
-                        Total: U$S ${(p.cantidad * p.precioUnitario).toFixed(2)}
-                    </div>
-                </div>
-            `).join('');
+        
+        filasTabla.push([
+            { content: descripcionFormateada, styles: { halign: 'left' } },
+            { content: formatearMoneda(p.precio), styles: { halign: 'right' } },
+            { content: formatearMoneda(totalLinea), styles: { halign: 'right' } }
+        ]);
+    });
+    
+    // Calcular IVA y total
+    const iva = subtotal * 0.22;
+    const total = subtotal + iva;
+    
+    // Filas de totales DENTRO de la tabla
+    filasTabla.push([
+        { 
+            content: '', 
+            styles: { fillColor: [255, 255, 255], lineWidth: { top: 0.5, bottom: 0, left: 0.4, right: 0.4 } } 
+        },
+        { 
+            content: 'sub Total  U$S', 
+            styles: { halign: 'right', fontStyle: 'italic', fontSize: 9 } 
+        },
+        { 
+            content: formatearMoneda(subtotal), 
+            styles: { halign: 'right', fontStyle: 'bold' } 
         }
-
-        function actualizarProducto(id, campo, valor) {
-            const producto = productos.find(p => p.id === id);
-            if (producto) {
-                producto[campo] = valor;
-                renderProductos();
-            }
+    ]);
+    
+    filasTabla.push([
+        { content: '', styles: { fillColor: [255, 255, 255] } },
+        { 
+            content: 'IVA 22%  U$S', 
+            styles: { halign: 'right', fontStyle: 'italic', fontSize: 9 } 
+        },
+        { 
+            content: formatearMoneda(iva), 
+            styles: { halign: 'right', fontStyle: 'bold' } 
         }
-
-        function generarYDescargarPDF() {
-            const cliente = document.getElementById('cliente').value;
-            
-            if (!cliente) {
-                alert('Por favor, ingresá el nombre del cliente');
-                return;
-            }
-
-            if (productos.length === 0) {
-                alert('Agregá al menos un producto');
-                return;
-            }
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                const referencia = document.getElementById('referencia').value;
-                const fechaInput = document.getElementById('fecha').value;
-                const fecha = new Date(fechaInput + 'T00:00:00');
-                const tiempoEntrega = document.getElementById('tiempoEntrega').value;
-                const lugarEntrega = document.getElementById('lugarEntrega').value;
-                const material = document.getElementById('material').value;
-                const formaPago = document.getElementById('formaPago').value;
-                const iva = parseFloat(document.getElementById('iva').value) || 0;
-
-                const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-                const fechaFormateada = `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
-
-                const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
-                const ivaAmount = subtotal * (iva / 100);
-                const total = subtotal + ivaAmount;
-
-                let y = 15;
-
-                // HEADER
-                doc.setFontSize(28);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(30, 58, 138);
-                doc.text('MODELO', 20, y);
-                
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(100, 100, 100);
-                doc.text('EQUIPAMIENTO DE OFICINAS', 20, y + 6);
-
-                doc.setFontSize(10);
-                doc.setTextColor(60, 60, 60);
-                doc.text('Montevideo, ' + fechaFormateada, 190, y + 2, { align: 'right' });
-
-                y += 15;
-                doc.setDrawColor(30, 58, 138);
-                doc.setLineWidth(1);
-                doc.line(20, y, 190, y);
-                y += 12;
-
-                // CLIENTE
-                doc.setFontSize(11);
-                doc.setTextColor(50, 50, 50);
-                doc.setFont('helvetica', 'normal');
-                doc.text('Sr.', 20, y);
-                y += 6;
-                
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(13);
-                doc.setTextColor(220, 38, 38);
-                doc.text(cliente.toUpperCase(), 20, y);
-
-                doc.setFontSize(10);
-                doc.setTextColor(30, 58, 138);
-                doc.setFont('helvetica', 'bold');
-                doc.text('REF: ' + referencia, 190, y, { align: 'right' });
-
-                y += 8;
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(50, 50, 50);
-                doc.text('Presente', 20, y);
-                y += 8;
-
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(10);
-                doc.setTextColor(70, 70, 70);
-                doc.text('De nuestra consideracion:', 20, y);
-                y += 5;
-                doc.text('        Por intermedio de la presente tenemos el agrado de cotizar el', 20, y);
-                y += 5;
-                doc.text('siguiente mobiliario de oficinas:', 20, y);
-                y += 10;
-
-                // TABLA
-                const tableData = productos.map(p => {
-                    let desc = p.cantidad + ' - ' + p.descripcion;
-                    if (p.detalles) desc += '\n' + p.detalles;
-                    return [desc, p.precioUnitario.toFixed(2), (p.cantidad * p.precioUnitario).toFixed(2)];
-                });
-
-                tableData.push(['', 'Sub Total U$S', subtotal.toFixed(2)]);
-                tableData.push(['', 'IVA ' + iva + '%', ivaAmount.toFixed(2)]);
-                tableData.push(['', 'TOTAL U$S', total.toFixed(2)]);
-
-                doc.autoTable({
-                    startY: y,
-                    head: [['DESCRIPCION', 'UNITARIO', 'TOTAL']],
-                    body: tableData,
-                    theme: 'grid',
-                    headStyles: {
-                        fillColor: [30, 58, 138],
-                        textColor: 255,
-                        fontStyle: 'bold',
-                        fontSize: 10,
-                        halign: 'center'
-                    },
-                    bodyStyles: {
-                        fontSize: 9,
-                        cellPadding: 4
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 110 },
-                        1: { cellWidth: 35, halign: 'right' },
-                        2: { cellWidth: 35, halign: 'right', fontStyle: 'bold' }
-                    },
-                    didParseCell: function(data) {
-                        const rowIndex = data.row.index;
-                        const totalRows = tableData.length;
-                        if (data.section === 'body' && rowIndex >= totalRows - 3) {
-                            data.cell.styles.fillColor = [240, 248, 255];
-                            data.cell.styles.fontStyle = 'bold';
-                            data.cell.styles.fontSize = 10;
-                        }
-                    }
-                });
-
-                y = doc.lastAutoTable.finalY + 10;
-
-                // CONDICIONES
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.3);
-                doc.line(20, y, 190, y);
-                y += 8;
-
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(30, 58, 138);
-                doc.setFontSize(9);
-                
-                doc.text('• MATERIAL:', 20, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(60, 60, 60);
-                doc.text(material, 75, y);
-                y += 6;
-
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(30, 58, 138);
-                doc.text('• FORMA DE PAGO:', 20, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(60, 60, 60);
-                doc.text(formaPago, 75, y);
-                y += 6;
-
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(30, 58, 138);
-                doc.text('• TIEMPO DE ENTREGA:', 20, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(220, 38, 38);
-                doc.text(tiempoEntrega, 75, y);
-                y += 6;
-
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(30, 58, 138);
-                doc.text('• LUGAR DE ENTREGA:', 20, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(60, 60, 60);
-                doc.text(lugarEntrega, 75, y);
-                y += 11;
-
-                // FIRMA
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(10);
-                doc.setTextColor(50, 50, 50);
-                doc.text('Atte.', 20, y);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Favio Counago', 34, y);
-
-                // FOOTER
-                y = 280;
-                doc.setDrawColor(30, 58, 138);
-                doc.setLineWidth(1);
-                doc.line(20, y - 5, 190, y - 5);
-                
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(220, 38, 38);
-                doc.text('Emilio Frugoni 1250 esq. Constituyente  •  Tel: 24-11-47-47', 105, y, { align: 'center' });
-                
-                doc.setTextColor(30, 58, 138);
-                doc.setFont('helvetica', 'bold');
-                doc.text('www.modeloequipamientos.com', 105, y + 5, { align: 'center' });
-
-                const filename = 'Presupuesto_' + cliente.replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf';
-                doc.save(filename);
-
-                mostrarAlerta('✅ PDF generado exitosamente', 'success');
-                
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al generar PDF: ' + error.message);
-            }
+    ]);
+    
+    filasTabla.push([
+        { content: '', styles: { fillColor: [255, 255, 255] } },
+        { 
+            content: 'TOTAL    U$S', 
+            styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, fillColor: celeste } 
+        },
+        { 
+            content: formatearMoneda(total), 
+            styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, fillColor: celeste } 
         }
+    ]);
+    
+    // Renderizar tabla con autoTable
+    doc.autoTable({
+        startY: yPos,
+        head: [[
+            { content: 'D E S C R I P C I O N', styles: { halign: 'center' } },
+            { content: 'UNITARIO', styles: { halign: 'center' } },
+            { content: 'TOTAL', styles: { halign: 'center' } }
+        ]],
+        body: filasTabla,
+        theme: 'grid',
+        styles: {
+            font: 'helvetica',
+            fontSize: 9.5,
+            textColor: [0, 0, 0],
+            lineColor: [0, 0, 0],
+            lineWidth: 0.4,
+            cellPadding: 2.5,
+            valign: 'middle'
+        },
+        headStyles: {
+            fillColor: [255, 255, 255],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold',
+            fontSize: 10,
+            lineColor: [0, 0, 0],
+            lineWidth: 0.5
+        },
+        columnStyles: {
+            0: { cellWidth: 115 },
+            1: { cellWidth: 32, halign: 'right' },
+            2: { cellWidth: 33, halign: 'right' }
+        },
+        margin: { left: marginX, right: marginX }
+    });
+    
+    // ==================== CONDICIONES COMERCIALES ====================
+    let yCondiciones = doc.lastAutoTable.finalY + 6;
+    
+    const material = document.getElementById('material')?.value || 'Material melaminico';
+    const formaPago = document.getElementById('formaPago')?.value || '30 días fecha de factura';
+    const tiempoEntrega = document.getElementById('tiempoEntrega')?.value || '4 dias habiles';
+    const lugarEntrega = document.getElementById('lugarEntrega')?.value || 'Montevideo';
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    
+    // MATERIAL
+    doc.text('MATERIAL', marginX, yCondiciones);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`: ${material}`, marginX + 40, yCondiciones);
+    
+    // FORMA DE PAGO (en rojo)
+    yCondiciones += 5.5;
+    doc.setFont('helvetica', 'bold');
+    doc.text('FORMA DE PAGO', marginX, yCondiciones);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+    doc.text(`: ${formaPago}`, marginX + 40, yCondiciones);
+    
+    // TIEMPO DE ENTREGA (en rojo)
+    yCondiciones += 5.5;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('TIEMPO DE ENTREGA', marginX, yCondiciones);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+    doc.text(`: ${tiempoEntrega}`, marginX + 40, yCondiciones);
+    
+    // LUGAR DE ENTREGA
+    yCondiciones += 5.5;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('LUGAR DE ENTREGA', marginX, yCondiciones);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`: ${lugarEntrega},-`, marginX + 40, yCondiciones);
+    
+    // ==================== FIRMA ====================
+    yCondiciones += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Atte.  Favio Couñago', marginX, yCondiciones);
+    
+    // ==================== FOOTER ====================
+    // Línea separadora antes del footer
+    const yFooter = pageHeight - 25;
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, yFooter - 4, pageWidth - marginX, yFooter - 4);
+    
+    // Dirección y teléfono en rojo
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+    doc.text('Emilio Frugoni  1250  esq. Constituyente     Tel  24 - 11 - 47 - 47', 
+             pageWidth / 2, yFooter, { align: 'center' });
+    
+    // Website en azul subrayado
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(azul[0], azul[1], azul[2]);
+    const website = 'www.modeloequipamientos.com';
+    const anchoWeb = doc.getTextWidth(website);
+    const xWeb = (pageWidth - anchoWeb) / 2;
+    doc.text(website, xWeb, yFooter + 6);
+    doc.setDrawColor(azul[0], azul[1], azul[2]);
+    doc.setLineWidth(0.3);
+    doc.line(xWeb, yFooter + 7, xWeb + anchoWeb, yFooter + 7);
+    
+    // ==================== GUARDAR PDF ====================
+    const nombreArchivo = `Modelo-${nombreCliente.replace(/\s+/g, '_')}-${hoy.getDate()}-${hoy.getMonth() + 1}-${hoy.getFullYear()}.pdf`;
+    doc.save(nombreArchivo);
+}
 
-        function guardarPresupuesto() {
-            const cliente = document.getElementById('cliente').value;
-            
-            if (!cliente) {
-                alert('Ingresá el nombre del cliente');
-                return;
-            }
+// ==================== FUNCIONES AUXILIARES ====================
+function formatearMoneda(num) {
+    return new Intl.NumberFormat('es-UY', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(num);
+}
 
-            const presupuesto = {
-                cliente: cliente,
-                referencia: document.getElementById('referencia').value,
-                fecha: document.getElementById('fecha').value,
-                tiempoEntrega: document.getElementById('tiempoEntrega').value,
-                lugarEntrega: document.getElementById('lugarEntrega').value,
-                material: document.getElementById('material').value,
-                formaPago: document.getElementById('formaPago').value,
-                iva: document.getElementById('iva').value,
-                productos: productos.map(p => ({...p}))
-            };
-
-            const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
-            const ivaAmount = subtotal * (parseFloat(presupuesto.iva) / 100);
-            presupuesto.total = subtotal + ivaAmount;
-
-            saveToStorage(presupuesto);
-            mostrarAlerta('Presupuesto guardado exitosamente', 'success');
-            cargarHistorial();
-        }
-
-        function cargarHistorial() {
-            const presupuestos = loadFromStorage();
-            const container = document.getElementById('historialContainer');
-
-            if (presupuestos.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">No hay presupuestos guardados</p>';
-                return;
-            }
-
-            container.innerHTML = presupuestos.reverse().map(p => `
-                <div class="historial-item" onclick="cargarPresupuesto(${p.id})">
-                    <div class="historial-header">
-                        <div>
-                            <div class="historial-cliente">${p.cliente}</div>
-                            <div class="historial-fecha">${new Date(p.fechaCreacion).toLocaleDateString('es-UY')}</div>
-                        </div>
-                        <div class="historial-total">U$S ${p.total.toFixed(2)}</div>
-                    </div>
-                    <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button class="btn btn-secondary" style="flex: 1; margin: 0; padding: 8px;" onclick="event.stopPropagation(); regenerarPDF(${p.id})">
-                            📄 Generar PDF
-                        </button>
-                        <button class="btn-remove" style="flex: 0;" onclick="event.stopPropagation(); eliminarPresupuesto(${p.id})">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function cargarPresupuesto(id) {
-            const presupuestos = loadFromStorage();
-            const p = presupuestos.find(pr => pr.id === id);
-            
-            if (!p) return;
-
-            document.getElementById('cliente').value = p.cliente;
-            document.getElementById('referencia').value = p.referencia;
-            document.getElementById('fecha').value = p.fecha;
-            document.getElementById('tiempoEntrega').value = p.tiempoEntrega;
-            document.getElementById('lugarEntrega').value = p.lugarEntrega;
-            document.getElementById('material').value = p.material;
-            document.getElementById('formaPago').value = p.formaPago;
-            document.getElementById('iva').value = p.iva;
-            
-            productos = p.productos.map(prod => ({...prod}));
-            productoCounter = Math.max(...productos.map(pr => pr.id));
-
-            renderProductos();
-            switchTab('nuevo');
-            mostrarAlerta('Presupuesto cargado', 'success');
-        }
-
-        function eliminarPresupuesto(id) {
-            if (confirm('¿Eliminar este presupuesto?')) {
-                deleteFromStorage(id);
-                cargarHistorial();
-            }
-        }
-
-        function regenerarPDF(id) {
-            cargarPresupuesto(id);
-            setTimeout(() => generarYDescargarPDF(), 100);
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            if (tab === 'nuevo') {
-                document.querySelector('.tab:nth-child(1)').classList.add('active');
-                document.getElementById('tabNuevo').classList.remove('hidden');
-                document.getElementById('tabHistorial').classList.add('hidden');
-            } else {
-                document.querySelector('.tab:nth-child(2)').classList.add('active');
-                document.getElementById('tabNuevo').classList.add('hidden');
-                document.getElementById('tabHistorial').classList.remove('hidden');
-                cargarHistorial();
-            }
-        }
-
-        function mostrarAlerta(mensaje, tipo) {
-            const alert = document.getElementById('successAlert');
-            alert.textContent = mensaje;
-            alert.className = 'alert alert-' + tipo;
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 3000);
-        }
-
-        function inicializarApp() {
-            document.getElementById('fecha').valueAsDate = new Date();
-            agregarProducto();
-            cargarHistorial();
-        }
-
-        checkAuth();
-    </script>
-</body>
-</html>
+function obtenerProductosDelFormulario() {
+    // Adaptar esta función a tu estructura actual.
+    // Debe retornar un array de objetos con esta estructura:
+    // {
+    //   cantidad: 1,
+    //   descripcionPrincipal: "Mesa de Reuniones rectangular de 275 x 115 x 75 de alto",
+    //   detalles: ["toda de 36mm de espesor ."],
+    //   material: "Material melaminico CEDRO NATURE",
+    //   precio: 375.00
+    // }
+    
+    const productos = [];
+    const filas = document.querySelectorAll('.producto-fila');
+    
+    filas.forEach(fila => {
+        const cantidad = parseInt(fila.querySelector('.cantidad')?.value) || 1;
+        const descripcion = fila.querySelector('.descripcion')?.value || '';
+        const precio = parseFloat(fila.querySelector('.precio')?.value) || 0;
+        
+        // Separar descripción en líneas (usa \n o | como separador)
+        const lineas = descripcion.split(/\n|\|/).map(l => l.trim()).filter(l => l);
+        
+        productos.push({
+            cantidad,
+            descripcionPrincipal: lineas[0] || descripcion,
+            detalles: lineas.slice(1, -1),
+            material: lineas.length > 1 ? lineas[lineas.length - 1] : '',
+            precio
+        });
+    });
+    
+    return productos;
+}
