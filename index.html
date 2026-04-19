@@ -7,297 +7,108 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            max-width: 1400px; margin: 0 auto;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
         }
-
-        @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        @media (max-width: 1200px) { .container { grid-template-columns: 1fr; } }
         .panel {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
+            background: white; border-radius: 16px; padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-        .header {
-            grid-column: 1 / -1;
-            text-align: center;
-            background: white;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            color: #1e3a8a;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            color: #64748b;
-            font-size: 16px;
-        }
-
-        .login-panel {
-            grid-column: 1 / -1;
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
+        .header { grid-column: 1 / -1; text-align: center; background: white; }
+        .header h1 { font-size: 32px; color: #1e3a8a; margin-bottom: 8px; }
+        .header p { color: #64748b; font-size: 16px; }
+        .login-panel { grid-column: 1 / -1; max-width: 400px; margin: 50px auto; }
         .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e3a8a;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #3b82f6;
+            font-size: 20px; font-weight: 700; color: #1e3a8a;
+            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #3b82f6;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
+        .form-group { margin-bottom: 20px; }
         .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 8px;
-            font-size: 14px;
+            display: block; font-weight: 600; color: #334155;
+            margin-bottom: 8px; font-size: 14px;
         }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-            font-family: inherit;
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px;
+            border: 2px solid #e2e8f0; border-radius: 8px;
+            font-size: 14px; transition: border-color 0.2s; font-family: inherit;
         }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none; border-color: #3b82f6;
         }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .producto-item {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s;
+            background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
+            padding: 20px; margin-bottom: 15px; transition: all 0.3s;
         }
-
         .producto-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
         }
-
         .producto-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
+            display: flex; justify-content: space-between;
+            align-items: flex-start; margin-bottom: 15px;
         }
-
         .producto-number {
-            background: #3b82f6;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
+            background: #3b82f6; color: white; width: 32px; height: 32px;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 14px;
         }
-
         .btn-remove {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background 0.2s;
+            background: #ef4444; color: white; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 13px; font-weight: 600; transition: background 0.2s;
         }
-
-        .btn-remove:hover {
-            background: #dc2626;
-        }
-
+        .btn-remove:hover { background: #dc2626; }
         .btn {
             background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 10px;
+            color: white; border: none; padding: 14px 28px;
+            border-radius: 8px; font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 10px;
         }
-
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
         }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-            margin-top: 0;
-        }
-
-        .btn-logout {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            margin-top: 20px;
-        }
-
-        .preview-container {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 8px;
-            min-height: 400px;
-        }
-
-        .preview-text {
-            color: #64748b;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
+        .btn-secondary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .btn-add { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); margin-top: 0; }
+        .btn-logout { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-top: 20px; }
+        .preview-container { background: #f8fafc; padding: 20px; border-radius: 8px; min-height: 400px; }
+        .preview-text { color: #64748b; text-align: center; padding: 40px 20px; }
         .historial-item {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px;
+            padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
         }
-
-        .historial-item:hover {
-            border-color: #3b82f6;
-            transform: translateX(4px);
-        }
-
+        .historial-item:hover { border-color: #3b82f6; transform: translateX(4px); }
         .historial-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 8px;
         }
-
-        .historial-cliente {
-            font-weight: 700;
-            color: #1e3a8a;
-            font-size: 16px;
-        }
-
-        .historial-fecha {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .historial-total {
-            font-size: 20px;
-            font-weight: 800;
-            color: #10b981;
-        }
-
+        .historial-cliente { font-weight: 700; color: #1e3a8a; font-size: 16px; }
+        .historial-fecha { color: #64748b; font-size: 13px; }
+        .historial-total { font-size: 20px; font-weight: 800; color: #10b981; }
         .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            display: flex; gap: 10px; margin-bottom: 20px;
             border-bottom: 2px solid #e2e8f0;
         }
-
         .tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+            padding: 12px 24px; background: none; border: none;
+            font-size: 15px; font-weight: 600; color: #64748b;
+            cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;
         }
-
-        .tab.active {
-            color: #1e3a8a;
-            border-bottom-color: #3b82f6;
-        }
-
-        .tab:hover {
-            color: #1e3a8a;
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .tab.active { color: #1e3a8a; border-bottom-color: #3b82f6; }
+        .tab:hover { color: #1e3a8a; }
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -307,23 +118,18 @@
                 <h1>🏢 Modelo Equipamientos</h1>
                 <p>Sistema de Generación de Presupuestos</p>
             </div>
-            
             <div class="panel login-panel">
                 <h2 class="section-title">Iniciar Sesión</h2>
                 <div id="loginError" class="alert alert-error hidden"></div>
-                
                 <div class="form-group">
                     <label>Usuario</label>
                     <input type="text" id="loginUser" placeholder="modelo">
                 </div>
-                
                 <div class="form-group">
                     <label>Contraseña</label>
                     <input type="password" id="loginPass" placeholder="••••••••">
                 </div>
-                
                 <button class="btn" onclick="login()">Ingresar</button>
-                
                 <p style="margin-top: 20px; text-align: center; color: #64748b; font-size: 13px;">
                     <strong>Demo:</strong> usuario: <code>modelo</code> / contraseña: <code>modelo2025</code>
                 </p>
@@ -337,30 +143,24 @@
                 <h1>📋 Generador de Presupuestos</h1>
                 <p>Modelo Equipamientos</p>
             </div>
-
             <div class="panel" style="grid-column: 1 / -1;">
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab('nuevo')">Nuevo Presupuesto</button>
                     <button class="tab" onclick="switchTab('historial')">Historial</button>
                 </div>
             </div>
-
             <div id="tabNuevo">
                 <div class="panel">
                     <h2 class="section-title">Datos del Presupuesto</h2>
-                    
                     <div id="successAlert" class="alert alert-success hidden"></div>
-                    
                     <div class="form-group">
                         <label>Cliente</label>
-                        <input type="text" id="cliente" placeholder="Ej: Gabriel De Leon">
+                        <input type="text" id="cliente" placeholder="Ej: Saceem">
                     </div>
-
                     <div class="form-group">
                         <label>Referencia</label>
-                        <input type="text" id="referencia" value="MOBILIARIO DE OFICINA">
+                        <input type="text" id="referencia" value="MOBILIARIO de OFICINA">
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Fecha</label>
@@ -368,42 +168,34 @@
                         </div>
                         <div class="form-group">
                             <label>Tiempo de Entrega</label>
-                            <input type="text" id="tiempoEntrega" value="4 días hábiles">
+                            <input type="text" id="tiempoEntrega" value="4 dias habiles">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label>Lugar de Entrega</label>
                         <input type="text" id="lugarEntrega" value="Montevideo">
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Material</label>
-                            <input type="text" id="material" value="Material melamínico">
+                            <input type="text" id="material" value="Material melaminico">
                         </div>
                         <div class="form-group">
                             <label>Forma de Pago</label>
                             <input type="text" id="formaPago" value="30 días fecha de factura">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label>IVA (%)</label>
                         <input type="number" id="iva" value="22" min="0" max="100">
                     </div>
-
                     <h2 class="section-title" style="margin-top: 40px;">Productos</h2>
-                    
                     <div id="productosContainer"></div>
-
                     <button class="btn btn-add" onclick="agregarProducto()">+ Agregar Producto</button>
-
                     <button class="btn btn-secondary" onclick="generarYDescargarPDF()">📄 Generar PDF</button>
                     <button class="btn" onclick="guardarPresupuesto()">💾 Guardar Presupuesto</button>
                     <button class="btn btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
                 </div>
-
                 <div class="panel">
                     <h2 class="section-title">Vista Previa</h2>
                     <div class="preview-container">
@@ -414,7 +206,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="tabHistorial" class="hidden">
                 <div class="panel" style="grid-column: 1 / -1;">
                     <h2 class="section-title">Presupuestos Guardados</h2>
@@ -450,7 +241,6 @@
         function login() {
             const user = document.getElementById('loginUser').value;
             const pass = document.getElementById('loginPass').value;
-            
             if (user === 'modelo' && pass === 'modelo2025') {
                 localStorage.setItem(USER_KEY, user);
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -499,44 +289,37 @@
 
         function renderProductos() {
             const container = document.getElementById('productosContainer');
-            
             if (productos.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">No hay productos agregados</p>';
                 return;
             }
-
             container.innerHTML = productos.map((p, index) => `
                 <div class="producto-item">
                     <div class="producto-header">
                         <div class="producto-number">${index + 1}</div>
                         <button class="btn-remove" onclick="eliminarProducto(${p.id})">✕ Eliminar</button>
                     </div>
-
                     <div class="form-group">
                         <label>Cantidad</label>
                         <input type="number" min="1" value="${p.cantidad}" 
                             onchange="actualizarProducto(${p.id}, 'cantidad', parseFloat(this.value))">
                     </div>
-
                     <div class="form-group">
                         <label>Descripción Principal</label>
                         <input type="text" placeholder="Ej: Mesa de Reuniones rectangular de 275 x 115 x 75 de alto"
                             value="${p.descripcion}"
                             onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">
                     </div>
-
                     <div class="form-group">
-                        <label>Detalles (opcional)</label>
-                        <textarea placeholder="Ej: toda de 36mm de espesor. Material melamínico CEDRO NATURE"
+                        <label>Detalles (opcional) - usá Enter para separar líneas</label>
+                        <textarea placeholder="Ej: toda de 36mm de espesor .&#10;Material melaminico CEDRO NATURE"
                             onchange="actualizarProducto(${p.id}, 'detalles', this.value)">${p.detalles}</textarea>
                     </div>
-
                     <div class="form-group">
                         <label>Precio Unitario (U$S)</label>
                         <input type="number" min="0" step="0.01" value="${p.precioUnitario}"
                             onchange="actualizarProducto(${p.id}, 'precioUnitario', parseFloat(this.value))">
                     </div>
-
                     <div style="background: #e0f2fe; padding: 12px; border-radius: 6px; text-align: center; font-weight: 700; color: #0c4a6e;">
                         Total: U$S ${(p.cantidad * p.precioUnitario).toFixed(2)}
                     </div>
@@ -554,251 +337,311 @@
 
         function generarYDescargarPDF() {
             const cliente = document.getElementById('cliente').value;
-            
-            if (!cliente) {
-                alert('Por favor, ingresá el nombre del cliente');
-                return;
-            }
-
-            if (productos.length === 0) {
-                alert('Agregá al menos un producto');
-                return;
-            }
+            if (!cliente) { alert('Por favor, ingresá el nombre del cliente'); return; }
+            if (productos.length === 0) { alert('Agregá al menos un producto'); return; }
 
             try {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+                const doc = new jsPDF('p', 'mm', 'a4');
 
-                const referencia = document.getElementById('referencia').value;
+                // ========== CONFIGURACIÓN ==========
+                const pageW = 210;
+                const pageH = 297;
+                const mL = 15;
+                const mR = 195;
+                const rojo = [200, 0, 0];
+                const azul = [0, 0, 210];
+                const celeste = [210, 228, 240];
+
+                const referencia = document.getElementById('referencia').value || 'MOBILIARIO de OFICINA';
                 const fechaInput = document.getElementById('fecha').value;
-                const fecha = new Date(fechaInput + 'T00:00:00');
+                const fecha = fechaInput ? new Date(fechaInput + 'T00:00:00') : new Date();
                 const tiempoEntrega = document.getElementById('tiempoEntrega').value;
                 const lugarEntrega = document.getElementById('lugarEntrega').value;
                 const material = document.getElementById('material').value;
                 const formaPago = document.getElementById('formaPago').value;
                 const iva = parseFloat(document.getElementById('iva').value) || 0;
 
-                const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-                const fechaFormateada = fecha.getDate() + ' de ' + meses[fecha.getMonth()] + ' del ' + fecha.getFullYear();
+                const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                               'Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'];
+                const fechaTxt = fecha.getDate() + ' de ' + meses[fecha.getMonth()] + ' del ' + fecha.getFullYear();
 
-                const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
-                const ivaAmount = subtotal * (iva / 100);
-                const total = subtotal + ivaAmount;
+                const subtotal = productos.reduce((s,p) => s + (p.cantidad * p.precioUnitario), 0);
+                const ivaAmt = subtotal * (iva / 100);
+                const total = subtotal + ivaAmt;
 
-                // BORDE DE TODA LA PÁGINA
+                // ========== BORDE EXTERIOR ==========
                 doc.setDrawColor(0, 0, 0);
-                doc.setLineWidth(2);
+                doc.setLineWidth(0.7);
                 doc.rect(10, 10, 190, 277);
 
-                let y = 20;
+                // ========== LOGO: 3 paralelogramos sólidos ==========
+                // Barras anchas, muy juntas, inclinadas levemente hacia arriba derecha
+                const logoX = 18;
+                const logoY = 17;
+                const bW = 5;
+                const bH = 8;
+                const bGap = 0.8;
+                const lean = 3;
 
-                // LOGO (3 barras más juntas y definidas)
                 doc.setFillColor(0, 0, 0);
-                // Barra 1
-                doc.moveTo(15, y + 8);
-                doc.lineTo(19, y);
-                doc.lineTo(23, y);
-                doc.lineTo(19, y + 8);
-                doc.fill();
-                
-                // Barra 2
-                doc.moveTo(21, y + 8);
-                doc.lineTo(25, y);
-                doc.lineTo(29, y);
-                doc.lineTo(25, y + 8);
-                doc.fill();
-                
-                // Barra 3
-                doc.moveTo(27, y + 8);
-                doc.lineTo(31, y);
-                doc.lineTo(35, y);
-                doc.lineTo(31, y + 8);
-                doc.fill();
+                for (let i = 0; i < 3; i++) {
+                    const x = logoX + i * (bW + bGap);
+                    doc.triangle(
+                        x, logoY + bH,
+                        x + bW, logoY + bH,
+                        x + bW + lean, logoY,
+                        'F'
+                    );
+                    doc.triangle(
+                        x, logoY + bH,
+                        x + bW + lean, logoY,
+                        x + lean, logoY,
+                        'F'
+                    );
+                }
 
-                // TEXTO LOGO (más grande)
+                // Texto del logo: "modelo" bold grande + subtítulo chico espaciado
+                const logoTextX = logoX + 3 * (bW + bGap) + lean + 2;
+                
                 doc.setFont('helvetica', 'bold');
-                doc.setFontSize(14);
+                doc.setFontSize(22);
                 doc.setTextColor(0, 0, 0);
-                doc.text('modelo', 40, y + 3);
+                doc.text('modelo', logoTextX, logoY + 7);
+
                 doc.setFont('helvetica', 'normal');
-                doc.setFontSize(10);
-                doc.text('equipamientos de oficinas', 40, y + 8);
+                doc.setFontSize(7);
+                doc.setTextColor(80, 80, 80);
+                doc.text('e q u i p a m i e n t o   d e   o f i c i n a s', logoTextX + 1, logoY + 11);
 
-                // FECHA (derecha)
+                // ========== FECHA (derecha) ==========
                 doc.setFont('helvetica', 'normal');
-                doc.setFontSize(10);
-                doc.text('Montevideo , ' + fechaFormateada + '.-', 190, y + 5, { align: 'right' });
-
-                y += 18;
-
-                // LÍNEA SEPARADORA
-                doc.setLineWidth(0.5);
-                doc.line(10, y, 200, y);
-                y += 10;
-
-                // SRES. + CLIENTE
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(11);
-                doc.setTextColor(200, 0, 0);
-                doc.text('Sres.', 15, y);
-                y += 5;
                 doc.setFontSize(12);
-                doc.text(cliente, 15, y);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Montevideo , ' + fechaTxt + ',-', mR, 22, { align: 'right' });
+
+                // ========== LÍNEA SEPARADORA HEADER ==========
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.5);
+                doc.line(mL, 31, mR, 31);
+
+                // ========== Sres. + nombre cliente + REF ==========
+                let y = 39;
                 
-                // REF (derecha)
+                doc.setFont('helvetica', 'bolditalic');
+                doc.setFontSize(12);
+                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+                doc.text('Sres.', mL, y);
+
+                y += 6;
+                doc.setFont('helvetica', 'bolditalic');
+                doc.setFontSize(11);
+                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+                doc.text(cliente, mL, y);
+
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(10);
                 doc.setTextColor(0, 0, 0);
-                doc.text('REF : ' + referencia, 190, y, { align: 'right' });
+                doc.text('REF : ' + referencia, mR, y, { align: 'right' });
 
+                // Presente con subrayado exacto
                 y += 6;
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(11);
                 doc.setTextColor(0, 0, 0);
-                doc.text('Presente', 15, y);
-                // Subrayado más corto
-                doc.setLineWidth(0.5);
-                doc.line(15, y + 0.5, 32, y + 0.5);
+                const txtPresente = 'Presente';
+                doc.text(txtPresente, mL, y);
+                const wPresente = doc.getTextWidth(txtPresente);
+                doc.setLineWidth(0.4);
+                doc.line(mL, y + 0.7, mL + wPresente, y + 0.7);
+
+                // De nuestra consideracion
                 y += 6;
-                doc.setFont('helvetica', 'bold');
-                doc.text('De nuestra consideracion :', 15, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text('De nuestra consideracion :', mL, y);
+
+                // Párrafo intro (primera línea indentada)
+                y += 6;
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.text('Por intermedio de la presente tenemos el', mL + 35, y);
+                y += 5;
+                doc.text('agrado de cotizar el siguiente mobiliario de oficinas :', mL, y);
+
+                // ========== TABLA DE PRODUCTOS ==========
                 y += 8;
 
-                // TEXTO INTRO
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(10);
-                doc.text('Por intermedio de la presente tenemos el', 45, y);
-                y += 5;
-                doc.text('agrado de cotizar el siguiente mobiliario de oficinas :', 15, y);
-                y += 10;
-
-                // TABLA CON BORDES
-                const tableData = [];
-                
+                const filas = [];
                 productos.forEach(p => {
-                    let desc = p.cantidad + ' - ' + p.descripcion;
+                    const lineas = [];
+                    lineas.push(p.cantidad + ' - ' + p.descripcion);
                     if (p.detalles) {
-                        desc += '\n   ' + p.detalles;
+                        const det = p.detalles.split(/\n/).map(l => l.trim()).filter(l => l);
+                        det.forEach(d => lineas.push('    ' + d));
                     }
-                    tableData.push([
-                        desc,
-                        p.precioUnitario.toFixed(2),
-                        (p.cantidad * p.precioUnitario).toFixed(2)
+                    filas.push([
+                        { content: lineas.join('\n') },
+                        { content: p.precioUnitario.toFixed(2).replace('.', ',') },
+                        { content: (p.cantidad * p.precioUnitario).toFixed(2).replace('.', ',') }
                     ]);
                 });
 
                 doc.autoTable({
                     startY: y,
-                    head: [['D E S C R I P C I O N', 'UNITARIO', 'TOTAL']],
-                    body: tableData,
+                    head: [[
+                        { content: 'D E S C R I P C I O N', styles: { halign: 'center', fontStyle: 'bolditalic' } },
+                        { content: 'UNITARIO', styles: { halign: 'center', fontStyle: 'bold' } },
+                        { content: 'TOTAL', styles: { halign: 'center', fontStyle: 'bold' } }
+                    ]],
+                    body: filas,
                     theme: 'grid',
-                    tableLineColor: [0, 0, 0],
-                    tableLineWidth: 1,
+                    styles: {
+                        font: 'helvetica',
+                        fontSize: 10,
+                        textColor: [0, 0, 0],
+                        lineColor: [0, 0, 0],
+                        lineWidth: 0.4,
+                        cellPadding: { top: 3, right: 3, bottom: 3, left: 3 },
+                        valign: 'top'
+                    },
                     headStyles: {
                         fillColor: [255, 255, 255],
                         textColor: [0, 0, 0],
-                        fontStyle: 'bold',
-                        fontSize: 10,
-                        halign: 'center',
-                        lineWidth: 1,
-                        lineColor: [0, 0, 0]
-                    },
-                    bodyStyles: {
-                        fontSize: 9,
-                        textColor: [0, 0, 0],
-                        cellPadding: 3,
-                        lineWidth: 1,
-                        lineColor: [0, 0, 0]
+                        fontSize: 10.5,
+                        lineColor: [0, 0, 0],
+                        lineWidth: 0.5,
+                        minCellHeight: 8
                     },
                     columnStyles: {
-                        0: { cellWidth: 120, valign: 'top' },
-                        1: { cellWidth: 35, halign: 'center' },
-                        2: { cellWidth: 35, halign: 'center' }
+                        0: { cellWidth: 115 },
+                        1: { cellWidth: 32, halign: 'right' },
+                        2: { cellWidth: 33, halign: 'right' }
                     },
-                    margin: { left: 10, right: 10 }
+                    margin: { left: mL, right: pageW - mR }
                 });
 
-                y = doc.lastAutoTable.finalY;
+                let yTab = doc.lastAutoTable.finalY;
 
-                // TOTALES EN LA TABLA
-                doc.autoTable({
-                    startY: y,
-                    body: [
-                        ['', 'sub Total  U$S', subtotal.toFixed(2)],
-                        ['', 'IVA ' + iva + '%  U$S', ivaAmount.toFixed(2)],
-                        ['', 'TOTAL    u$s', total.toFixed(2)]
-                    ],
-                    theme: 'grid',
-                    tableLineColor: [0, 0, 0],
-                    tableLineWidth: 1,
-                    bodyStyles: {
-                        fontSize: 10,
-                        fontStyle: 'bold',
-                        textColor: [0, 0, 0],
-                        cellPadding: 2,
-                        lineWidth: 1,
-                        lineColor: [0, 0, 0]
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 120 },
-                        1: { cellWidth: 35, halign: 'right' },
-                        2: { cellWidth: 35, halign: 'center' }
-                    },
-                    margin: { left: 10, right: 10 }
-                });
+                // ========== BLOQUE DE TOTALES (al costado derecho, bajo la tabla) ==========
+                const totCol1X = mL + 115;
+                const totCol2X = mL + 115 + 32;
+                const totW1 = 32;
+                const totW2 = 33;
+                const rowH = 6.5;
 
-                y = doc.lastAutoTable.finalY + 8;
-
-                // CONDICIONES (sin guiones, menos espacios)
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9);
-                doc.text('MATERIAL :', 15, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(material, 38, y);
-                y += 5;
-
-                doc.setFont('helvetica', 'bold');
-                doc.text('FORMA DE PAGO :', 15, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(200, 0, 0);
-                doc.text(formaPago, 48, y);
+                // sub Total
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.4);
+                doc.rect(totCol1X, yTab, totW1, rowH);
+                doc.rect(totCol2X, yTab, totW2, rowH);
+                doc.setFont('helvetica', 'bolditalic');
+                doc.setFontSize(9.5);
                 doc.setTextColor(0, 0, 0);
-                y += 5;
-
+                doc.text('sub Total  U$S', totCol1X + totW1 - 2, yTab + 4.3, { align: 'right' });
                 doc.setFont('helvetica', 'bold');
-                doc.text('TIEMPO DE ENTREGA :', 15, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(200, 0, 0);
-                doc.text(tiempoEntrega, 56, y);
-                doc.setTextColor(0, 0, 0);
-                y += 5;
+                doc.text(subtotal.toFixed(2).replace('.', ','), totCol2X + totW2 - 2, yTab + 4.3, { align: 'right' });
 
+                // IVA
+                const yIva = yTab + rowH;
+                doc.rect(totCol1X, yIva, totW1, rowH);
+                doc.rect(totCol2X, yIva, totW2, rowH);
+                doc.setFont('helvetica', 'bolditalic');
+                doc.text('IVA ' + iva + '%  U$S', totCol1X + totW1 - 2, yIva + 4.3, { align: 'right' });
                 doc.setFont('helvetica', 'bold');
-                doc.text('LUGAR DE ENTREGA :', 15, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(lugarEntrega + ',-', 54, y);
-                y += 10;
+                doc.text(ivaAmt.toFixed(2).replace('.', ','), totCol2X + totW2 - 2, yIva + 4.3, { align: 'right' });
 
-                // FIRMA
+                // TOTAL (fondo celeste)
+                const yTot = yIva + rowH;
+                doc.setFillColor(celeste[0], celeste[1], celeste[2]);
+                doc.rect(totCol1X, yTot, totW1, rowH, 'F');
+                doc.rect(totCol2X, yTot, totW2, rowH, 'F');
+                doc.setDrawColor(0, 0, 0);
+                doc.rect(totCol1X, yTot, totW1, rowH);
+                doc.rect(totCol2X, yTot, totW2, rowH);
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(10);
-                doc.text('Atte.  Favio Counago', 15, y);
+                doc.setTextColor(0, 0, 0);
+                doc.text('TOTAL   U$S', totCol1X + totW1 - 2, yTot + 4.4, { align: 'right' });
+                doc.text(total.toFixed(2).replace('.', ','), totCol2X + totW2 - 2, yTot + 4.4, { align: 'right' });
 
-                // FOOTER
-                y = 275;
+                // ========== CONDICIONES (al lado izquierdo, al lado de los totales) ==========
+                let yC = yTab + 2;
+                const labelX = mL + 2;
+                const valueX = mL + 42;
+
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+
+                // MATERIAL
+                doc.setFont('helvetica', 'bold');
+                doc.text('- MATERIAL', labelX, yC + 3);
+                doc.text(':', valueX - 2, yC + 3);
+                doc.text(material, valueX + 2, yC + 3);
+
+                // FORMA DE PAGO (valor en rojo)
+                yC += 6.5;
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('- FORMA DE PAGO', labelX, yC + 3);
+                doc.text(':', valueX - 2, yC + 3);
+                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+                doc.text(formaPago, valueX + 2, yC + 3);
+
+                // TIEMPO DE ENTREGA (valor en rojo)
+                yC += 6.5;
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('- TIEMPO DE ENTREGA :', labelX, yC + 3);
+                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+                doc.text(tiempoEntrega, valueX + 10, yC + 3);
+
+                // LUGAR DE ENTREGA
+                yC += 6.5;
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('- LUGAR DE ENTREGA  :', labelX, yC + 3);
+                doc.text(lugarEntrega + ',-', valueX + 10, yC + 3);
+
+                yC += 10;
+                const yBajoTotales = yTot + rowH + 4;
+                let yFirma = Math.max(yC, yBajoTotales);
+
+                // ========== FIRMA ==========
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(10);
-                doc.setTextColor(200, 0, 0);
-                doc.text('Emilio Frugoni  1250  esq. Constituyente     Tel  24 - 11 - 47 - 47', 105, y, { align: 'center' });
-                y += 5;
-                doc.setTextColor(0, 0, 255);
-                doc.text('www.modeloequipamientos.com', 105, y, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+                doc.text('Atte.  Favio Couñago', mL, yFirma);
 
-                const filename = 'Presupuesto_' + cliente.replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf';
+                // ========== FOOTER ==========
+                const yLineaFooter = pageH - 28;
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.4);
+                doc.line(mL, yLineaFooter, mR, yLineaFooter);
+
+                doc.setFont('helvetica', 'bolditalic');
+                doc.setFontSize(11);
+                doc.setTextColor(rojo[0], rojo[1], rojo[2]);
+                doc.text('Emilio Frugoni  1250  esq. Constituyente     Tel  24 - 11 - 47 - 47',
+                         mL + 2, yLineaFooter + 7);
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.setTextColor(azul[0], azul[1], azul[2]);
+                const web = 'www.modeloequipamientos.com';
+                const wWeb = doc.getTextWidth(web);
+                const xWeb = mL + 35;
+                doc.text(web, xWeb, yLineaFooter + 14);
+                doc.setDrawColor(azul[0], azul[1], azul[2]);
+                doc.setLineWidth(0.4);
+                doc.line(xWeb, yLineaFooter + 14.7, xWeb + wWeb, yLineaFooter + 14.7);
+
+                const filename = 'Modelo_' + cliente.replace(/\s+/g, '_') + '_' + 
+                                 fecha.getDate() + '-' + (fecha.getMonth() + 1) + '-' + fecha.getFullYear() + '.pdf';
                 doc.save(filename);
 
                 mostrarAlerta('✅ PDF generado exitosamente', 'success');
-                
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error al generar PDF: ' + error.message);
@@ -807,12 +650,7 @@
 
         function guardarPresupuesto() {
             const cliente = document.getElementById('cliente').value;
-            
-            if (!cliente) {
-                alert('Ingresá el nombre del cliente');
-                return;
-            }
-
+            if (!cliente) { alert('Ingresá el nombre del cliente'); return; }
             const presupuesto = {
                 cliente: cliente,
                 referencia: document.getElementById('referencia').value,
@@ -824,11 +662,9 @@
                 iva: document.getElementById('iva').value,
                 productos: productos.map(p => ({...p}))
             };
-
             const subtotal = productos.reduce((sum, p) => sum + (p.cantidad * p.precioUnitario), 0);
             const ivaAmount = subtotal * (parseFloat(presupuesto.iva) / 100);
             presupuesto.total = subtotal + ivaAmount;
-
             saveToStorage(presupuesto);
             mostrarAlerta('Presupuesto guardado exitosamente', 'success');
             cargarHistorial();
@@ -837,12 +673,10 @@
         function cargarHistorial() {
             const presupuestos = loadFromStorage();
             const container = document.getElementById('historialContainer');
-
             if (presupuestos.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">No hay presupuestos guardados</p>';
                 return;
             }
-
             container.innerHTML = presupuestos.reverse().map(p => `
                 <div class="historial-item" onclick="cargarPresupuesto(${p.id})">
                     <div class="historial-header">
@@ -867,9 +701,7 @@
         function cargarPresupuesto(id) {
             const presupuestos = loadFromStorage();
             const p = presupuestos.find(pr => pr.id === id);
-            
             if (!p) return;
-
             document.getElementById('cliente').value = p.cliente;
             document.getElementById('referencia').value = p.referencia;
             document.getElementById('fecha').value = p.fecha;
@@ -878,10 +710,8 @@
             document.getElementById('material').value = p.material;
             document.getElementById('formaPago').value = p.formaPago;
             document.getElementById('iva').value = p.iva;
-            
             productos = p.productos.map(prod => ({...prod}));
             productoCounter = Math.max(...productos.map(pr => pr.id));
-
             renderProductos();
             switchTab('nuevo');
             mostrarAlerta('Presupuesto cargado', 'success');
@@ -901,7 +731,6 @@
 
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
             if (tab === 'nuevo') {
                 document.querySelector('.tab:nth-child(1)').classList.add('active');
                 document.getElementById('tabNuevo').classList.remove('hidden');
